@@ -2,7 +2,7 @@ name: Install Murdoku v8
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 
 permissions:
   contents: write
@@ -17,10 +17,10 @@ jobs:
           ref: main
       - name: Build and verify index.html
         run: |
-          cat .tmp-v8/chunk-* | base64 -d > index.html
+          cat .tmp-v8-gz/part-* | base64 -d | gzip -d > index.html
           test "$(git hash-object index.html)" = "7ae0edf7f0ff67e6faa7ea1234b4bf93a7eb1679"
       - name: Remove staging files and installer
-        run: rm -rf .tmp-v8 .github/workflows/install-v8.yml
+        run: rm -rf .tmp-v8 .tmp-v8-gz .github/workflows/install-v8.yml
       - name: Commit Murdoku v8
         run: |
           git config user.name "github-actions[bot]"
