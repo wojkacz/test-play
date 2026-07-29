@@ -53,10 +53,17 @@
     .cell.conflict{box-shadow:inset 0 0 0 5px var(--danger);z-index:5}
     .cell.blocked{background:repeating-linear-gradient(135deg,#172033 0 8px,#26334a 8px 16px);color:#e7ecf7}
     .cell.auto-blocked:not(.blocked){background:#fff1f3}
-    .room-name{position:absolute;left:4px;top:3px;right:4px;font-size:9px;line-height:1.05;font-weight:950;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:3}
-    .coords{position:absolute;left:4px;bottom:3px;font-size:8px;color:#7a8799;z-index:2}
-    .objects{position:absolute;inset:17px 5px 6px;display:flex;justify-content:center;align-items:center;gap:2px;flex-wrap:wrap;font-size:calc(var(--cell-size) * .28);line-height:1;z-index:2;filter:drop-shadow(0 1px 1px rgba(255,255,255,.9))}
-    .object-badge{display:inline-grid;place-items:center;min-width:24px;min-height:24px}
+    .room-name{position:absolute;left:4px;top:3px;z-index:6;max-width:calc(100% - 8px);padding:2px 5px;border:1px solid rgba(30,41,59,.22);border-radius:999px;background:rgba(255,255,255,.82);box-shadow:0 1px 3px rgba(15,23,42,.12);font-size:clamp(7px,calc(var(--cell-size) * .105),10px);line-height:1;font-weight:950;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+    .objects{position:absolute;inset:3px;display:flex;justify-content:center;align-items:center;gap:0;flex-wrap:wrap;line-height:1;z-index:2;filter:drop-shadow(0 2px 2px rgba(255,255,255,.95)) drop-shadow(0 1px 1px rgba(15,23,42,.22));pointer-events:none}
+    .cell.has-room-label .objects{top:16px}
+    .object-badge{display:inline-grid;place-items:center;width:48%;height:48%;min-width:0;min-height:0;font-size:calc(var(--cell-size) * .32);line-height:1}
+    .objects.count-1 .object-badge{width:100%;height:100%;font-size:calc(var(--cell-size) * .50)}
+    .objects.count-2 .object-badge{width:49%;height:94%;font-size:calc(var(--cell-size) * .39)}
+    .objects.count-many .object-badge{font-size:calc(var(--cell-size) * .27)}
+    .emoji-icon{display:inline-grid;place-items:center;line-height:1}
+    .table-icon{position:relative;display:inline-block;width:1em;height:.78em;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(15,23,42,.2))}
+    .table-icon::before{content:"";position:absolute;left:5%;right:5%;top:7%;height:31%;border:2px solid #5b371d;border-radius:.11em;background:linear-gradient(#b97a46,#8b572f);box-shadow:inset 0 2px 0 rgba(255,255,255,.3)}
+    .table-icon::after{content:"";position:absolute;left:13%;right:13%;top:39%;bottom:4%;background:linear-gradient(90deg,#5b371d 0 14%,transparent 14% 86%,#5b371d 86% 100%)}
     .blocked-label{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:950;letter-spacing:.03em}
     .note-dot{position:absolute;right:4px;bottom:4px;width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 2px white;z-index:8}
     .final-token{position:absolute;inset:10%;z-index:8;border-radius:50%;display:grid;place-items:center;border:3px solid rgba(255,255,255,.95);box-shadow:0 5px 13px rgba(0,0,0,.3);font-size:calc(var(--cell-size) * .33);font-weight:1000;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.3)}
@@ -188,7 +195,7 @@
     {id:'chair',name:'Fotel / krzesło',symbol:'🪑',occupiable:true,edge:false,builtin:true},
     {id:'carpet',name:'Dywan',symbol:'▧',occupiable:true,edge:false,builtin:true},
     {id:'bed',name:'Łóżko',symbol:'🛏️',occupiable:true,edge:false,builtin:true},
-    {id:'table',name:'Stół',symbol:'▰',occupiable:false,edge:false,builtin:true},
+    {id:'table',name:'Stół',symbol:'🪵',occupiable:false,edge:false,builtin:true},
     {id:'tv',name:'Telewizor',symbol:'📺',occupiable:false,edge:false,builtin:true},
     {id:'plant',name:'Roślina',symbol:'🪴',occupiable:false,edge:false,builtin:true},
     {id:'bookcase',name:'Regał',symbol:'📚',occupiable:false,edge:false,builtin:true},
@@ -203,7 +210,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:6,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},clues:''});
+  const makeState=()=>({version:7,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
@@ -216,7 +223,7 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=6;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=7;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.people=Array.isArray(state.people)?state.people:d.people;state.rules=Object.assign({},d.rules,state.rules||{});
     if(!state.people.some(p=>p.victim))state.people.push(clone(DEFAULT_PEOPLE[3]));
     const need=state.rows*state.cols;state.cells=Array.isArray(state.cells)?state.cells.slice(0,need):[];while(state.cells.length<need)state.cells.push(makeCell());
@@ -235,6 +242,24 @@
   function getPerson(id){return state.people.find(p=>p.id===id)}
   function rc(i){return{r:Math.floor(i/state.cols),c:i%state.cols}}
   function idx(r,c){return r*state.cols+c}
+  function objectIcon(o){if(!o)return'';if(o.id==='table')return'<span class="table-icon" role="img" aria-label="Stół"></span>';return`<span class="emoji-icon">${esc(o.symbol)}</span>`}
+  function roomLabelAnchors(){
+    const labels=new Map(),seen=new Set(),steps=[[1,0],[-1,0],[0,1],[0,-1]];
+    for(let start=0;start<state.cells.length;start++){
+      const roomId=state.cells[start].roomId;if(!roomId||seen.has(start))continue;
+      const room=getRoom(roomId);if(!room)continue;
+      const component=[],queue=[start];seen.add(start);
+      while(queue.length){
+        const current=queue.shift(),p=rc(current);component.push(current);
+        steps.forEach(([dr,dc])=>{const r=p.r+dr,c=p.c+dc;if(r<0||c<0||r>=state.rows||c>=state.cols)return;const n=idx(r,c);if(!seen.has(n)&&state.cells[n].roomId===roomId){seen.add(n);queue.push(n)}});
+      }
+      const center=component.reduce((a,i)=>{const p=rc(i);a.r+=p.r;a.c+=p.c;return a},{r:0,c:0});center.r/=component.length;center.c/=component.length;
+      let best=component[0],bestScore=Infinity;
+      component.forEach(i=>{const p=rc(i),cell=state.cells[i];let score=(p.r-center.r)**2+(p.c-center.c)**2;score+=cell.blocked?100:0;score+=cell.final?40:0;score+=cell.objects.length*12;score+=cell.windows.length*2;score+=cell.excluded?8:0;if(score<bestScore||(score===bestScore&&i<best)){best=i;bestScore=score}});
+      labels.set(best,room);
+    }
+    return labels;
+  }
   function toast(msg){el.toast.textContent=msg;el.toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.toast.classList.remove('show'),2100)}
   function openSheet(title,html){el.sheetTitle.textContent=title;el.sheetBody.innerHTML=html;el.backdrop.classList.add('open');el.sheet.classList.add('open');document.body.style.overflow='hidden'}
   function closeSheet(){el.sheet.classList.remove('open');el.backdrop.classList.remove('open');document.body.style.overflow='';setTimeout(()=>{if(!el.sheet.classList.contains('open'))el.sheetBody.innerHTML=''},220)}
@@ -246,7 +271,7 @@
     return'';
   }
   function cellAutoReason(index){
-    if(!state.rules.autoX)return'';const cell=state.cells[index];if(objectBlocks(cell))return'Na tym wyposażeniu nie wolno stać';return rowColumnReason(index);
+    if(!state.rules.autoX)return'';const cell=state.cells[index];if(objectBlocks(cell))return'';return rowColumnReason(index);
   }
   function constraintReason(index,personId){
     const cell=state.cells[index];if(cell.blocked)return'Pole niedostępne';if(cell.excluded)return'Pole zostało wykluczone';if(objectBlocks(cell))return'Na tym wyposażeniu nie wolno stać';
@@ -280,7 +305,7 @@
     if(state.mode==='build'){
       const clear=`<button class="object-chip ${state.clearMode?'active':''}" data-action="clear-mode"><span style="font-size:20px">🧹</span>Czyść</button>`;
       if(state.buildTool==='room')el.activeStrip.innerHTML=clear+`<button class="room-chip" data-action="rooms">＋ pokoje</button>`+state.rooms.map(r=>`<button class="room-chip ${!state.clearMode&&r.id===state.activeRoomId?'active':''}" data-room="${r.id}"><span style="width:20px;height:20px;border-radius:6px;background:${esc(r.color)}"></span>${esc(r.name)}</button>`).join('');
-      else if(state.buildTool==='object')el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="objects">＋ przedmioty</button>`+state.objects.filter(o=>!o.edge).map(o=>`<button class="object-chip ${!state.clearMode&&o.id===state.activeObjectId?'active':''}" data-object="${o.id}"><span style="font-size:21px">${esc(o.symbol)}</span>${esc(o.name)}</button>`).join('');
+      else if(state.buildTool==='object')el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="objects">＋ przedmioty</button>`+state.objects.filter(o=>!o.edge).map(o=>`<button class="object-chip ${!state.clearMode&&o.id===state.activeObjectId?'active':''}" data-object="${o.id}"><span style="font-size:21px">${objectIcon(o)}</span>${esc(o.name)}</button>`).join('');
       else if(state.buildTool==='window')el.activeStrip.innerHTML=clear+`<button class="object-chip ${state.clearMode?'':'active'}"><span style="font-size:21px">🪟</span>Wybierz pole, potem krawędź</button>`;
       else if(state.buildTool==='block')el.activeStrip.innerHTML=clear+`<button class="object-chip ${state.clearMode?'':'active'}"><span style="font-size:20px">▧</span>Dotknij, aby przełączyć blokadę</button>`;
       else el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="cell">✏️ Edytuj wybrane pole</button><button class="object-chip" data-action="setup">⚙️ Plansza</button>`;
@@ -293,21 +318,22 @@
     }
   }
   function renderBoard(){
-    el.board.style.setProperty('--cols',state.cols);const markCols=Math.ceil(Math.sqrt(Math.max(1,state.people.length)));const bad=conflicts();let html='';
+    el.board.style.setProperty('--cols',state.cols);const markCols=Math.ceil(Math.sqrt(Math.max(1,state.people.length)));const bad=conflicts(),roomLabels=roomLabelAnchors();let html='';
     state.cells.forEach((cell,i)=>{
-      const room=getRoom(cell.roomId),b=roomBorders(i),style=[`border-top:${b.top?'4px':'1px'} solid ${b.top?'#1f2937':'#8e9bad'}`,`border-right:${b.right?'4px':'1px'} solid ${b.right?'#1f2937':'#8e9bad'}`,`border-bottom:${b.bottom?'4px':'1px'} solid ${b.bottom?'#1f2937':'#8e9bad'}`,`border-left:${b.left?'4px':'1px'} solid ${b.left?'#1f2937':'#8e9bad'}`];if(room)style.push(`background-color:${esc(room.color)}`);
-      const autoCell=cellAutoReason(i);let inner=`<div class="room-name">${room?esc(room.name):''}</div>`;
+      const room=getRoom(cell.roomId),labelRoom=roomLabels.get(i),b=roomBorders(i),style=[`border-top:${b.top?'4px':'1px'} solid ${b.top?'#1f2937':'#8e9bad'}`,`border-right:${b.right?'4px':'1px'} solid ${b.right?'#1f2937':'#8e9bad'}`,`border-bottom:${b.bottom?'4px':'1px'} solid ${b.bottom?'#1f2937':'#8e9bad'}`,`border-left:${b.left?'4px':'1px'} solid ${b.left?'#1f2937':'#8e9bad'}`];if(room)style.push(`background-color:${esc(room.color)}`);
+      const autoCell=cellAutoReason(i),blockedByObject=objectBlocks(cell);let inner=labelRoom?`<div class="room-name" title="${esc(labelRoom.name)}">${esc(labelRoom.name)}</div>`:'';
       if(cell.blocked)inner+=`<div class="blocked-label">NIEDOSTĘPNE</div>`;
       else{
-        const objs=cell.objects.map(getObj).filter(Boolean).map(o=>`<span class="object-badge" title="${esc(o.name)}">${esc(o.symbol)}</span>`).join('');inner+=`<div class="objects">${objs}</div>`;
+        const objectList=cell.objects.map(getObj).filter(Boolean),countClass=objectList.length===1?'count-1':objectList.length===2?'count-2':objectList.length>4?'count-many':'';
+        const objs=objectList.map(o=>`<span class="object-badge" title="${esc(o.name)}">${objectIcon(o)}</span>`).join('');inner+=`<div class="objects ${countClass}">${objs}</div>`;
         if(state.mode==='play'){
           if(cell.final){const p=getPerson(cell.final);if(p)inner+=`<div class="final-token" style="background:${esc(p.color)}">${esc(p.code)}</div>`}
           else if(cell.excluded||autoCell)inner+=`<div class="cell-x ${autoCell&&!cell.excluded?'auto':''}" title="${esc(cell.excluded?'Pole wykluczone':autoCell)}">×</div>`;
-          else{inner+=`<div class="marks" style="--mark-cols:${markCols}">`;state.people.forEach(p=>{const manual=cell.marks[p.id]||'';if(manual==='candidate')inner+=`<div class="mark candidate" style="color:${esc(p.color)}">${esc(p.code)}</div>`;else inner+=`<div class="mark"></div>`});inner+='</div>'}
+          else if(!blockedByObject){inner+=`<div class="marks" style="--mark-cols:${markCols}">`;state.people.forEach(p=>{const manual=cell.marks[p.id]||'';if(manual==='candidate')inner+=`<div class="mark candidate" style="color:${esc(p.color)}">${esc(p.code)}</div>`;else inner+=`<div class="mark"></div>`});inner+='</div>'}
         }
       }
-      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}">│</span>`);if(cell.note)inner+='<span class="note-dot"></span>';const pos=rc(i);inner+=`<span class="coords">${pos.r+1},${pos.c+1}</span>`;
-      html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${bad.has(i)?'conflict':''} ${autoCell&&!cell.blocked?'auto-blocked':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
+      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}">│</span>`);if(cell.note)inner+='<span class="note-dot"></span>';
+      html+=`<button class="cell ${cell.blocked?'blocked':''} ${labelRoom?'has-room-label':''} ${state.selected===i?'selected':''} ${bad.has(i)?'conflict':''} ${autoCell&&!cell.blocked?'auto-blocked':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     el.board.innerHTML=html;el.finalStatus.textContent=String(state.cells.filter(c=>c.final).length);el.conflictStatus.hidden=bad.size===0;el.cellStatus.textContent=state.selected==null?'—':`${rc(state.selected).r+1}×${rc(state.selected).c+1}`;
   }
@@ -329,7 +355,7 @@
     const cell=state.cells[i];if(cell.blocked){toast('To pole jest niedostępne.');renderBoard();return}
     if(state.playTool==='inspect'){renderBoard();openCellSheet(i);return}
     if(state.playTool==='x'){
-      if(cell.final){toast('Najpierw usuń finalne ustawienie z tego pola.');return}if(cellAutoReason(i)){toast('To pole jest już automatycznie wykluczone.');renderBoard();return}
+      if(cell.final){toast('Najpierw usuń finalne ustawienie z tego pola.');return}if(objectBlocks(cell)){toast('To pole jest niedozwolone przez przedmiot — nie trzeba stawiać na nim X.');renderBoard();return}if(cellAutoReason(i)){toast('To pole jest już automatycznie wykluczone.');renderBoard();return}
       change(()=>{cell.excluded=!cell.excluded;if(cell.excluded)cell.marks={}});return;
     }
     const pid=state.activePersonId;if(!pid){toast('Najpierw wybierz osobę.');return}
@@ -347,7 +373,7 @@
       <div class="section"><div class="field"><label>Pokój</label><select id="cellRoom"><option value="">Bez pokoju</option>${state.rooms.map(r=>`<option value="${r.id}" ${r.id===cell.roomId?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
       <div class="field"><label>Notatka</label><textarea id="cellNote" placeholder="Np. ważna wskazówka">${esc(cell.note)}</textarea></div>
       <label class="toggle"><input id="cellBlocked" type="checkbox" ${cell.blocked?'checked':''}><span>Pole niedostępne</span></label></div>
-      <div class="section"><h3>Przedmioty na polu</h3><div class="palette">${state.objects.filter(o=>!o.edge).map(o=>`<button data-cell-object="${o.id}" class="${cell.objects.includes(o.id)?'active':''}" title="${esc(o.name)}">${esc(o.symbol)}</button>`).join('')}</div></div>
+      <div class="section"><h3>Przedmioty na polu</h3><div class="palette">${state.objects.filter(o=>!o.edge).map(o=>`<button data-cell-object="${o.id}" class="${cell.objects.includes(o.id)?'active':''}" title="${esc(o.name)}">${objectIcon(o)}</button>`).join('')}</div></div>
       <div class="section"><h3>Okno na krawędzi</h3><button class="btn full" id="openWindowFromCell">Ustaw lub usuń okno</button></div>
       <button class="btn danger full" id="clearCell">Wyczyść całe pole</button>`);
     $('#cellRoom').addEventListener('change',e=>change(()=>state.cells[i].roomId=e.target.value||null));
@@ -384,10 +410,10 @@
   function personForm(id){const p=id?getPerson(id):{name:'',code:'',color:'#8b5cf6',victim:false};openSheet(id?'Edytuj osobę':'Nowy podejrzany',`<div class="field"><label>Nazwa</label><input id="personName" value="${esc(p.name)}" placeholder="Np. Austin"></div><div class="grid2"><div class="field"><label>Kod</label><input id="personCode" value="${esc(p.code)}" maxlength="3" placeholder="A"></div><div class="field"><label>Kolor</label><input id="personColor" type="color" value="${esc(p.color)}"></div></div><button class="btn primary full" id="savePerson">Zapisz</button>`);$('#savePerson').onclick=()=>{const name=$('#personName').value.trim(),code=$('#personCode').value.trim().slice(0,3);if(!name||!code){toast('Podaj nazwę i kod.');return}change(()=>{if(id)Object.assign(getPerson(id),{name,code,color:$('#personColor').value});else{const n={id:uid('person'),name,code,color:$('#personColor').value,victim:false};state.people.splice(Math.max(0,state.people.length-1),0,n);state.activePersonId=n.id}});peopleSheet()}}
   function roomsSheet(){openSheet('Pokoje',`<div class="list">${state.rooms.map(r=>`<div class="list-row"><span style="width:34px;height:34px;border-radius:9px;background:${esc(r.color)}"></span><div><strong>${esc(r.name)}</strong><small>Dotknij narzędzia „Pokój”, aby malować pola</small></div><div class="actions"><button class="tiny" data-edit-room="${r.id}">✏️</button><button class="tiny" data-del-room="${r.id}">🗑</button></div></div>`).join('')}</div><button class="btn primary full" id="addRoom" style="margin-top:10px">＋ Dodaj pokój</button>`);$$('[data-edit-room]',el.sheetBody).forEach(b=>b.onclick=()=>roomForm(b.dataset.editRoom));$$('[data-del-room]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delRoom;change(()=>{state.rooms=state.rooms.filter(r=>r.id!==id);state.cells.forEach(c=>{if(c.roomId===id)c.roomId=null})});roomsSheet()});$('#addRoom').onclick=()=>roomForm(null)}
   function roomForm(id){const r=id?getRoom(id):{name:'',color:'#fef3c7'};openSheet(id?'Edytuj pokój':'Nowy pokój',`<div class="field"><label>Nazwa</label><input id="roomName" value="${esc(r.name)}" placeholder="Np. Salon"></div><div class="field"><label>Kolor pól</label><input id="roomColor" type="color" value="${esc(r.color)}"></div><button class="btn primary full" id="saveRoom">Zapisz</button>`);$('#saveRoom').onclick=()=>{const name=$('#roomName').value.trim();if(!name){toast('Podaj nazwę pokoju.');return}change(()=>{if(id)Object.assign(getRoom(id),{name,color:$('#roomColor').value});else{const n={id:uid('room'),name,color:$('#roomColor').value};state.rooms.push(n);state.activeRoomId=n.id}});roomsSheet()}}
-  function objectsSheet(){openSheet('Przedmioty',`<p class="hint"><span class="ok-text">Dozwolone:</span> fotel/krzesło, dywan, łóżko. <span class="danger-text">Niedozwolone:</span> stół, telewizor, roślina, regał i pudło. Okno ustawia się na krawędzi.</p><div class="list">${state.objects.map(o=>`<div class="list-row"><span style="font-size:26px">${esc(o.symbol)}</span><div><strong>${esc(o.name)}</strong><small>${o.edge?'Obiekt krawędziowy':o.occupiable?'Może być zajęty':'Nie może być zajęty'}</small></div><div class="actions">${o.builtin?'':`<button class="tiny" data-edit-object="${o.id}">✏️</button><button class="tiny" data-del-object="${o.id}">🗑</button>`}</div></div>`).join('')}</div><button class="btn primary full" id="addObject" style="margin-top:10px">＋ Dodaj własny przedmiot</button>`);$$('[data-edit-object]',el.sheetBody).forEach(b=>b.onclick=()=>objectForm(b.dataset.editObject));$$('[data-del-object]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delObject;change(()=>{state.objects=state.objects.filter(o=>o.id!==id);state.cells.forEach(c=>c.objects=c.objects.filter(x=>x!==id))});objectsSheet()});$('#addObject').onclick=()=>objectForm(null)}
+  function objectsSheet(){openSheet('Przedmioty',`<p class="hint"><span class="ok-text">Dozwolone:</span> fotel/krzesło, dywan, łóżko. <span class="danger-text">Niedozwolone:</span> stół, telewizor, roślina, regał i pudło. Okno ustawia się na krawędzi.</p><div class="list">${state.objects.map(o=>`<div class="list-row"><span style="font-size:32px;display:grid;place-items:center;width:40px;height:40px">${objectIcon(o)}</span><div><strong>${esc(o.name)}</strong><small>${o.edge?'Obiekt krawędziowy':o.occupiable?'Może być zajęty':'Nie może być zajęty'}</small></div><div class="actions">${o.builtin?'':`<button class="tiny" data-edit-object="${o.id}">✏️</button><button class="tiny" data-del-object="${o.id}">🗑</button>`}</div></div>`).join('')}</div><button class="btn primary full" id="addObject" style="margin-top:10px">＋ Dodaj własny przedmiot</button>`);$$('[data-edit-object]',el.sheetBody).forEach(b=>b.onclick=()=>objectForm(b.dataset.editObject));$$('[data-del-object]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delObject;change(()=>{state.objects=state.objects.filter(o=>o.id!==id);state.cells.forEach(c=>c.objects=c.objects.filter(x=>x!==id))});objectsSheet()});$('#addObject').onclick=()=>objectForm(null)}
   function objectForm(id){const o=id?getObj(id):{name:'',symbol:'◆',occupiable:true};openSheet(id?'Edytuj przedmiot':'Nowy przedmiot',`<div class="field"><label>Nazwa</label><input id="objName" value="${esc(o.name)}"></div><div class="field"><label>Emoji lub krótki symbol</label><input id="objSymbol" value="${esc(o.symbol)}" maxlength="4"></div><label class="toggle"><input id="objOcc" type="checkbox" ${o.occupiable?'checked':''}><span>Osoba może zajmować pole z tym przedmiotem</span></label><button class="btn primary full" id="saveObject">Zapisz</button>`);$('#saveObject').onclick=()=>{const name=$('#objName').value.trim(),symbol=$('#objSymbol').value.trim();if(!name||!symbol){toast('Podaj nazwę i symbol.');return}change(()=>{if(id)Object.assign(getObj(id),{name,symbol,occupiable:$('#objOcc').checked});else{const n={id:uid('obj'),name,symbol,occupiable:$('#objOcc').checked,edge:false,builtin:false};state.objects.push(n);state.activeObjectId=n.id}});objectsSheet()}}
   function rulesSheet(){openSheet('Reguły i wskazówki',`<div class="section"><label class="toggle"><input id="autoX" type="checkbox" ${state.rules.autoX?'checked':''}><span>Pokazuj automatyczne X</span></label><label class="toggle"><input id="rowsCols" type="checkbox" ${state.rules.uniqueRowsCols?'checked':''}><span>Każda osoba w innym wierszu i kolumnie</span></label><label class="toggle"><input id="uniquePeople" type="checkbox" ${state.rules.uniquePeople?'checked':''}><span>Każda osoba tylko raz na planszy</span></label><label class="toggle"><input id="equip" type="checkbox" ${state.rules.forbidEquipment?'checked':''}><span>Blokuj stół, TV, roślinę, regał i pudło</span></label></div><div class="field"><label>Opis wskazówek z książki</label><textarea id="clues" placeholder="Przepisz wskazówki…">${esc(state.clues)}</textarea></div><button class="btn primary full" id="saveRules">Zapisz</button>`);$('#saveRules').onclick=()=>{change(()=>{state.rules.autoX=$('#autoX').checked;state.rules.uniqueRowsCols=$('#rowsCols').checked;state.rules.uniquePeople=$('#uniquePeople').checked;state.rules.forbidEquipment=$('#equip').checked;state.clues=$('#clues').value});closeSheet()}}
-  function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Wybierz narzędzie na dole. Nad narzędziami pojawią się pokoje, przedmioty albo osoby.</li><li>Opcja <strong>Czyść</strong> resetuje każde dotknięte pole wraz z pokojem, przedmiotami, oknami i oznaczeniami.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia jedno duże X na całym polu, a „Finalnie” ustawia osobę.</li><li>Po finalnym ustawieniu całe pola w tym samym wierszu i kolumnie oraz pola z niedozwolonym wyposażeniem dostają automatyczne X.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li><li>„Obok” oznacza bezpośrednio górę, dół, lewo lub prawo oraz ten sam pokój.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
+  function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Wybierz narzędzie na dole. Nad narzędziami pojawią się pokoje, przedmioty albo osoby.</li><li>Opcja <strong>Czyść</strong> resetuje każde dotknięte pole wraz z pokojem, przedmiotami, oknami i oznaczeniami.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia jedno duże X na całym polu, a „Finalnie” ustawia osobę.</li><li>Po finalnym ustawieniu pola w tym samym wierszu i kolumnie dostają automatyczne X. Niedozwolone wyposażenie pozostaje widoczne bez X, ale nie można na nim ustawić osoby.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li><li>„Obok” oznacza bezpośrednio górę, dół, lewo lub prawo oraz ten sam pokój.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
 
   function placeVictimLast(){
     const victim=state.people.find(p=>p.victim);if(!victim){toast('Brak ofiary.');return}const usedR=new Set(),usedC=new Set();state.cells.forEach((c,i)=>{if(c.final){const p=rc(i);usedR.add(p.r);usedC.add(p.c)}});const freeR=[];for(let r=0;r<state.rows;r++)if(!usedR.has(r))freeR.push(r);const freeC=[];for(let c=0;c<state.cols;c++)if(!usedC.has(c))freeC.push(c);if(freeR.length!==1||freeC.length!==1){toast('Musi pozostać dokładnie jeden wolny wiersz i jedna kolumna.');return}const i=idx(freeR[0],freeC[0]),reason=constraintReason(i,victim.id);if(reason&&state.cells[i].final!==victim.id){toast(reason);return}change(()=>state.cells[i].final=victim.id);closeSheet();toast('Ofiara ustawiona na ostatnim wolnym polu.')
