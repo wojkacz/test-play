@@ -300,38 +300,36 @@
       if(!runs.length)continue;
 
       const metrics=labelMetrics(room.name),horizontalPadding=18;
-      const requiredCols=Math.max(1,Math.ceil((metrics.width+horizontalPadding)/metrics.cellSize));
       const minimumRun=runs.some(run=>run.len>=2)?2:1;
-      const oneLineRuns=runs.filter(run=>run.len>=Math.max(minimumRun,requiredCols));
-      let chosen,twoLines=false,widthCells;
+      const usableRuns=runs.filter(run=>run.len>=minimumRun);
+      const textCapacity=run=>Math.max(4,run.len*metrics.cellSize-8-horizontalPadding);
+      const oneLineRuns=usableRuns.filter(run=>metrics.width<=textCapacity(run));
+      let chosen,twoLines=false;
 
       if(oneLineRuns.length){
-        const preferredRuns=oneLineRuns.some(run=>run.len>=3)?oneLineRuns.filter(run=>run.len>=3):oneLineRuns;
-        preferredRuns.sort((a,b)=>b.row-a.row||b.end-a.end||b.len-a.len);
-        chosen=preferredRuns[0];
-        const comfortableMinimum=chosen.len>=3?3:minimumRun;
-        widthCells=Math.min(chosen.len,Math.max(requiredCols,comfortableMinimum));
+        oneLineRuns.sort((a,b)=>b.row-a.row||b.end-a.end||a.len-b.len);
+        chosen=oneLineRuns[0];
       }else{
-        const usable=runs.filter(run=>run.len>=minimumRun);
-        usable.sort((a,b)=>b.len-a.len||b.row-a.row||b.end-a.end);
-        chosen=usable[0]||runs.sort((a,b)=>b.row-a.row||b.end-a.end)[0];
-        widthCells=chosen.len;
+        usableRuns.sort((a,b)=>b.len-a.len||b.row-a.row||b.end-a.end);
+        chosen=usableRuns[0]||runs.sort((a,b)=>b.row-a.row||b.end-a.end)[0];
         twoLines=true;
       }
 
-      const leftCell=chosen.end-widthCells+1;
-      const availableWidth=Math.max(12,widthCells*metrics.cellSize-horizontalPadding);
-      let lines=[metrics.text],fontSize=metrics.fontSize;
+      const maxLabelWidth=Math.max(12,chosen.len*metrics.cellSize-8);
+      const availableTextWidth=Math.max(4,maxLabelWidth-horizontalPadding);
+      let lines=[metrics.text],fontSize=metrics.fontSize,renderedTextWidth=metrics.width;
       if(twoLines){
-        lines=splitLabelIntoTwoLines(metrics.text,metrics.ctx,availableWidth);
+        lines=splitLabelIntoTwoLines(metrics.text,metrics.ctx,availableTextWidth);
         const widest=Math.max(...lines.map(line=>metrics.ctx.measureText(line).width));
-        if(widest>availableWidth)fontSize=Math.max(7,metrics.fontSize*(availableWidth/widest));
+        if(widest>availableTextWidth)fontSize=Math.max(7,metrics.fontSize*(availableTextWidth/widest));
+        renderedTextWidth=widest*(fontSize/metrics.fontSize);
       }
+      const labelWidth=Math.min(maxLabelWidth,Math.ceil(renderedTextWidth+horizontalPadding));
       labels.push({
         room,
         className:twoLines?'two-lines':'one-line',
         html:lines.filter(Boolean).map(esc).join('<br>'),
-        style:`--label-font-size:${fontSize.toFixed(2)}px;left:calc(${leftCell} * var(--cell-size) + 4px);width:calc(${widthCells} * var(--cell-size) - 8px);top:calc(${chosen.row + 1} * var(--cell-size) - 4px);transform:translateY(-100%);`
+        style:`--label-font-size:${fontSize.toFixed(2)}px;left:calc(${chosen.end + 1} * var(--cell-size) - ${labelWidth + 4}px);width:${labelWidth}px;top:calc(${chosen.row + 1} * var(--cell-size) - 4px);transform:translateY(-100%);`
       });
     }
     return labels;
