@@ -1,0 +1,27 @@
+name: Install Murdoku v7
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/install-v7.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build index.html
+        run: cat .tmp-v7/chunk-* | base64 -d > index.html
+      - name: Remove staging files
+        run: rm -rf .tmp-v7
+      - name: Commit Murdoku v7
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Update index.html to Murdoku v7"
+          git push
