@@ -53,7 +53,9 @@
     .cell.conflict{box-shadow:inset 0 0 0 5px var(--danger);z-index:5}
     .cell.blocked{background:repeating-linear-gradient(135deg,#172033 0 8px,#26334a 8px 16px);color:#e7ecf7}
     .cell.auto-blocked:not(.blocked){background:#fff1f3}
-    .room-label{position:absolute;z-index:1;display:block;padding:2px 6px;border:1px solid rgba(30,41,59,.18);border-radius:10px;background:rgba(255,255,255,.72);box-shadow:0 1px 3px rgba(15,23,42,.10);font-size:clamp(8px,calc(var(--cell-size) * .118),11px);line-height:1.1;font-weight:950;text-transform:uppercase;text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:break-word;pointer-events:none;max-height:calc(var(--cell-size) * .48);overflow:hidden}
+    .room-label{position:absolute;z-index:1;display:flex;align-items:flex-end;justify-content:flex-end;padding:3px 7px;border:1px solid rgba(15,23,42,.22);border-radius:10px;background:rgba(255,255,255,.78);box-shadow:0 1px 3px rgba(15,23,42,.10);color:#000;font-size:var(--label-font-size,clamp(8px,calc(var(--cell-size) * .118),11px));line-height:1.08;font-weight:950;text-transform:uppercase;text-align:right;pointer-events:none;overflow:hidden}
+    .room-label.one-line{white-space:nowrap;max-height:1.55em}
+    .room-label.two-lines{white-space:normal;max-height:2.45em}
     .objects{position:absolute;inset:3px;display:flex;justify-content:center;align-items:center;gap:0;flex-wrap:wrap;line-height:1;z-index:3;filter:drop-shadow(0 2px 2px rgba(255,255,255,.95)) drop-shadow(0 1px 1px rgba(15,23,42,.22));pointer-events:none}
     .object-badge{display:inline-grid;place-items:center;width:48%;height:48%;min-width:0;min-height:0;font-size:calc(var(--cell-size) * .32);line-height:1}
     .objects.count-1 .object-badge{width:100%;height:100%;font-size:calc(var(--cell-size) * .50)}
@@ -209,7 +211,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:8,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},clues:''});
+  const makeState=()=>({version:9,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
@@ -222,7 +224,7 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=8;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=9;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.people=Array.isArray(state.people)?state.people:d.people;state.rules=Object.assign({},d.rules,state.rules||{});
     if(!state.people.some(p=>p.victim))state.people.push(clone(DEFAULT_PEOPLE[3]));
     const need=state.rows*state.cols;state.cells=Array.isArray(state.cells)?state.cells.slice(0,need):[];while(state.cells.length<need)state.cells.push(makeCell());
@@ -242,6 +244,33 @@
   function rc(i){return{r:Math.floor(i/state.cols),c:i%state.cols}}
   function idx(r,c){return r*state.cols+c}
   function objectIcon(o){if(!o)return'';if(o.id==='table')return'<span class="table-icon" role="img" aria-label="Stół"></span>';return`<span class="emoji-icon">${esc(o.symbol)}</span>`}
+  function labelMetrics(name){
+    const cellSize=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'))||82;
+    const fontSize=clamp(cellSize*.118,8,11);
+    const canvas=labelMetrics.canvas||(labelMetrics.canvas=document.createElement('canvas'));
+    const ctx=canvas.getContext('2d');
+    ctx.font=`950 ${fontSize}px -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif`;
+    const text=String(name||'').trim().toUpperCase();
+    return{cellSize,fontSize,text,width:ctx.measureText(text).width,ctx};
+  }
+  function splitLabelIntoTwoLines(text,ctx,maxWidth){
+    const words=text.split(/\s+/).filter(Boolean);
+    let options=[];
+    if(words.length>1){
+      for(let i=1;i<words.length;i++)options.push([words.slice(0,i).join(' '),words.slice(i).join(' ')]);
+    }else if(text.length>1){
+      for(let i=1;i<text.length;i++)options.push([text.slice(0,i),text.slice(i)]);
+    }
+    if(!options.length)return[text,''];
+    let best=options[0],bestScore=Infinity;
+    options.forEach(lines=>{
+      const a=ctx.measureText(lines[0]).width,b=ctx.measureText(lines[1]).width;
+      const overflow=Math.max(0,a-maxWidth)+Math.max(0,b-maxWidth);
+      const score=overflow*20+Math.max(a,b)+Math.abs(a-b)*.18;
+      if(score<bestScore){best=lines;bestScore=score}
+    });
+    return best;
+  }
   function roomLabelsData(){
     const labels=[],seen=new Set(),steps=[[1,0],[-1,0],[0,1],[0,-1]];
     for(let start=0;start<state.cells.length;start++){
@@ -252,39 +281,57 @@
         const current=queue.shift(),p=rc(current);component.push(current);
         steps.forEach(([dr,dc])=>{const r=p.r+dr,c=p.c+dc;if(r<0||c<0||r>=state.rows||c>=state.cols)return;const n=idx(r,c);if(!seen.has(n)&&state.cells[n].roomId===roomId){seen.add(n);queue.push(n)}});
       }
+
       const rows=new Map();
       component.forEach(i=>{const p=rc(i);if(!rows.has(p.r))rows.set(p.r,[]);rows.get(p.r).push(p.c)});
       rows.forEach(cols=>cols.sort((a,b)=>a-b));
-      const sortedRows=[...rows.keys()].sort((a,b)=>b-a);
-      const minWidthTarget=Math.max(1,Math.min(4,Math.ceil((room.name||'').length/8)));
-      let bestRun=null;
-      sortedRows.forEach((row,rowRank)=>{
-        const cols=rows.get(row)||[];
+      const runs=[];
+      rows.forEach((cols,row)=>{
         if(!cols.length)return;
-        let startC=cols[0],prev=cols[0];
-        const pushRun=(s,e)=>{
-          const len=e-s+1;
-          const candidate={row,start:s,end:e,len,rowRank,score:0};
-          candidate.score=row*1000 + e*25 + Math.min(len,6)*4 - Math.abs(len-minWidthTarget);
-          if(!bestRun || candidate.score>bestRun.score || (candidate.score===bestRun.score && (candidate.len>bestRun.len || candidate.end>bestRun.end))) bestRun=candidate;
-        };
+        let runStart=cols[0],previous=cols[0];
+        const addRun=(from,to)=>runs.push({row,start:from,end:to,len:to-from+1});
         for(let i=1;i<=cols.length;i++){
-          const value=cols[i];
-          if(value===prev+1){prev=value;continue;}
-          pushRun(startC,prev);
-          startC=value;prev=value;
+          const current=cols[i];
+          if(current===previous+1){previous=current;continue}
+          addRun(runStart,previous);
+          runStart=current;previous=current;
         }
       });
-      if(!bestRun)continue;
-      const desiredWidth=Math.max(1,Math.min(bestRun.len,Math.ceil((room.name||'').length/7)));
-      const widthCells=Math.max(1,Math.min(bestRun.len,desiredWidth));
-      const leftCell=bestRun.end-widthCells+1;
+      if(!runs.length)continue;
+
+      const metrics=labelMetrics(room.name),horizontalPadding=18;
+      const requiredCols=Math.max(1,Math.ceil((metrics.width+horizontalPadding)/metrics.cellSize));
+      const minimumRun=runs.some(run=>run.len>=2)?2:1;
+      const oneLineRuns=runs.filter(run=>run.len>=Math.max(minimumRun,requiredCols));
+      let chosen,twoLines=false,widthCells;
+
+      if(oneLineRuns.length){
+        const preferredRuns=oneLineRuns.some(run=>run.len>=3)?oneLineRuns.filter(run=>run.len>=3):oneLineRuns;
+        preferredRuns.sort((a,b)=>b.row-a.row||b.end-a.end||b.len-a.len);
+        chosen=preferredRuns[0];
+        const comfortableMinimum=chosen.len>=3?3:minimumRun;
+        widthCells=Math.min(chosen.len,Math.max(requiredCols,comfortableMinimum));
+      }else{
+        const usable=runs.filter(run=>run.len>=minimumRun);
+        usable.sort((a,b)=>b.len-a.len||b.row-a.row||b.end-a.end);
+        chosen=usable[0]||runs.sort((a,b)=>b.row-a.row||b.end-a.end)[0];
+        widthCells=chosen.len;
+        twoLines=true;
+      }
+
+      const leftCell=chosen.end-widthCells+1;
+      const availableWidth=Math.max(12,widthCells*metrics.cellSize-horizontalPadding);
+      let lines=[metrics.text],fontSize=metrics.fontSize;
+      if(twoLines){
+        lines=splitLabelIntoTwoLines(metrics.text,metrics.ctx,availableWidth);
+        const widest=Math.max(...lines.map(line=>metrics.ctx.measureText(line).width));
+        if(widest>availableWidth)fontSize=Math.max(7,metrics.fontSize*(availableWidth/widest));
+      }
       labels.push({
         room,
-        row:bestRun.row,
-        leftCell,
-        widthCells,
-        style:`left:calc(${leftCell} * var(--cell-size) + 4px);width:calc(${widthCells} * var(--cell-size) - 8px);top:calc(${bestRun.row + 1} * var(--cell-size) - 4px);transform:translateY(-100%);`
+        className:twoLines?'two-lines':'one-line',
+        html:lines.filter(Boolean).map(esc).join('<br>'),
+        style:`--label-font-size:${fontSize.toFixed(2)}px;left:calc(${leftCell} * var(--cell-size) + 4px);width:calc(${widthCells} * var(--cell-size) - 8px);top:calc(${chosen.row + 1} * var(--cell-size) - 4px);transform:translateY(-100%);`
       });
     }
     return labels;
@@ -370,7 +417,7 @@
       html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${bad.has(i)?'conflict':''} ${autoCell&&!cell.blocked?'auto-blocked':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     if(roomLabels.length){
-      html += roomLabels.map(label=>`<div class="room-label" title="${esc(label.room.name)}" style="${label.style}">${esc(label.room.name)}</div>`).join('');
+      html += roomLabels.map(label=>`<div class="room-label ${label.className}" title="${esc(label.room.name)}" style="${label.style}">${label.html}</div>`).join('');
     }
     el.board.innerHTML=html;el.finalStatus.textContent=String(state.cells.filter(c=>c.final).length);el.conflictStatus.hidden=bad.size===0;el.cellStatus.textContent=state.selected==null?'—':`${rc(state.selected).r+1}×${rc(state.selected).c+1}`;
   }
