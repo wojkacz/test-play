@@ -1,0 +1,39 @@
+name: Install Murdoku v7
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/install-murdoku-v7.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assemble and verify index.html
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .tmp-v7/chunk-* | base64 --decode > index.html.new
+          echo "2e662632237945057b4f7553416c698bba346b7c4867ac4f324a689aea352ab9  index.html.new" | sha256sum -c -
+          mv index.html.new index.html
+      - name: Commit final file and clean staging files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .tmp-v7
+          rm -f .github/workflows/install-murdoku-v7.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Update index.html to Murdoku v7"
+          git push origin HEAD:main
