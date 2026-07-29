@@ -1,0 +1,35 @@
+name: Install Murdoku v8
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  install:
+    if: github.event.issue.title == 'Install Murdoku v8 now'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Build and verify index.html
+        run: |
+          cat .tmp-v8/chunk-* | base64 -d > index.html
+          test "$(git hash-object index.html)" = "7ae0edf7f0ff67e6faa7ea1234b4bf93a7eb1679"
+      - name: Remove staging files and installer
+        run: rm -rf .tmp-v8 .github/workflows/install-v8.yml
+      - name: Commit Murdoku v8
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Update index.html to Murdoku v8"
+          git push
+      - name: Close trigger issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}"
