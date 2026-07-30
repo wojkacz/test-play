@@ -74,25 +74,24 @@
     .mark.candidate{background:rgba(255,255,255,.88)}
     .mark.x{color:#dc2447;font-size:calc(var(--cell-size) * .19)}
     .mark.auto{background:rgba(251,113,133,.12);color:#9f1239}
-    .edge-window{position:absolute;z-index:11;pointer-events:none;background:#e9f5ff;border:2px solid #334155;border-radius:4px;display:block;color:transparent;font-size:0;box-shadow:0 0 0 1px rgba(255,255,255,.72)}
+    .edge-window{position:absolute;z-index:11;pointer-events:none;width:74%;height:12px;left:13%;top:-2px;box-sizing:border-box;background:#e9f5ff;border:2px solid #334155;border-radius:4px;color:transparent;font-size:0;box-shadow:0 0 0 1px rgba(255,255,255,.72);transform-origin:center}
     .edge-window::before,.edge-window::after{content:"";position:absolute;background:#334155;border-radius:2px}
-    .edge-window.top,.edge-window.bottom{width:42%;height:12px;left:29%}
-    .edge-window.top{top:-2px}.edge-window.bottom{bottom:-2px;transform:rotate(180deg)}
-    .edge-window.top::before,.edge-window.bottom::before{width:2px;top:0;bottom:0;left:calc(50% - 1px)}
-    .edge-window.top::after,.edge-window.bottom::after{height:2px;left:3px;right:3px;bottom:1px;opacity:.42}
-    .edge-window.left,.edge-window.right{height:42%;width:12px;top:29%}
-    .edge-window.left{left:-2px}.edge-window.right{right:-2px}
-    .edge-window.left::before,.edge-window.right::before{height:2px;left:0;right:0;top:calc(50% - 1px)}
-    .edge-window.left::after,.edge-window.right::after{width:2px;top:3px;bottom:3px;right:1px;opacity:.42}
+    .edge-window::before{width:2px;top:0;bottom:0;left:calc(50% - 1px)}
+    .edge-window::after{height:2px;left:3px;right:3px;bottom:1px;opacity:.42}
+    .edge-window.bottom{top:calc(100% - 10px);transform:rotate(180deg)}
+    .edge-window.left{left:calc(-37% + 4px);top:calc(50% - 6px);transform:rotate(-90deg)}
+    .edge-window.right{left:calc(63% - 4px);top:calc(50% - 6px);transform:rotate(90deg)}
     .victim-result{margin:0 10px 8px;padding:10px 12px;border-radius:13px;border:1px solid var(--ok);background:rgba(52,211,153,.08);font-size:13px;line-height:1.35}
 
     .bottom{position:sticky;bottom:0;z-index:35;background:rgba(13,18,34,.97);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safeBottom))}
-    .active-strip{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:7px}
+    .active-strip{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:3px 2px 9px}
     .active-strip::-webkit-scrollbar{display:none}
     .person-chip,.object-chip,.room-chip{flex:none;min-height:42px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:850}
+    .instruction-chip{flex:1 0 100%;width:100%;justify-content:center}
     .person-chip.active,.object-chip.active,.room-chip.active{outline:2px solid var(--accent);border-color:transparent;background:#24204a}
     .person-dot{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:1000;text-shadow:0 1px 2px rgba(0,0,0,.4)}
     .tool-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+    #playTools{grid-template-columns:repeat(4,1fr)}
     .tool{min-width:0;min-height:50px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:5px 2px;color:var(--muted);font-size:10px;font-weight:900;display:grid;place-items:center;line-height:1.05}
     .tool span{display:block;font-size:20px;margin-bottom:2px;color:var(--text)}
     .tool.active{border-color:var(--accent);background:rgba(139,92,246,.2);color:#fff}
@@ -179,7 +178,6 @@
       <button class="tool" data-tool="x"><span>✕</span>Wyklucz</button>
       <button class="tool" data-tool="final"><span>●</span>Finalnie</button>
       <button class="tool" data-tool="inspect"><span>☝️</span>Podgląd</button>
-      <button class="tool" id="victimCellBtn"><span>☠️</span>Ofiara</button>
     </div>
   </footer>
 </div>
@@ -227,20 +225,20 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:11,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},clues:''});
+  const makeState=()=>({version:12,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
   normalize();
 
   const el={
-    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput'),victimCell:$('#victimCellBtn')
+    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
   };
 
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=11;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=12;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
     const rawPeople=Array.isArray(state.people)?state.people:d.people,victim=rawPeople.find(p=>p&&p.victim)||clone(DEFAULT_PEOPLE[3]),suspects=rawPeople.filter(p=>p&&!p.victim).slice(0,PERSON_CODES.length);
@@ -265,7 +263,7 @@
   function nextPersonCode(){return PERSON_CODES[state.people.filter(p=>!p.victim).length]||null}
   function nextPersonColor(){return randomUnusedColor(PERSON_COLORS,state.people.filter(p=>!p.victim).map(p=>p.color))}
   function nextRoomColor(){return randomUnusedColor(ROOM_COLORS,state.rooms.map(r=>r.color))}
-  function peopleForStrip(){const people=[...state.people];if(state.mode==='play'&&state.playTool==='final'){const placed=new Set(state.cells.map(c=>c.final).filter(Boolean));people.sort((a,b)=>Number(placed.has(a.id))-Number(placed.has(b.id))||Number(a.victim)-Number(b.victim)||String(a.code).localeCompare(String(b.code),'pl'))}return people}
+  function peopleForStrip(){const placed=new Set(state.cells.map(c=>c.final).filter(Boolean)),people=[...state.people];if(state.mode==='play'&&state.playTool==='candidate')return people.filter(p=>!placed.has(p.id));if(state.mode==='play'&&state.playTool==='final')people.sort((a,b)=>Number(placed.has(a.id))-Number(placed.has(b.id))||Number(a.victim)-Number(b.victim)||String(a.code).localeCompare(String(b.code),'pl'));return people}
   function rc(i){return{r:Math.floor(i/state.cols),c:i%state.cols}}
   function idx(r,c){return r*state.cols+c}
   function objectIcon(o){if(!o)return'';if(o.id==='table')return'<span class="table-icon" role="img" aria-label="Stół"></span>';return`<span class="emoji-icon">${esc(o.symbol)}</span>`}
@@ -412,11 +410,12 @@
       else if(state.buildTool==='block')el.activeStrip.innerHTML=clear+`<button class="object-chip ${state.clearMode?'':'active'}"><span style="font-size:20px">▧</span>Dotknij, aby przełączyć blokadę</button>`;
       else el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="cell">✏️ Edytuj wybrane pole</button><button class="object-chip" data-action="setup">⚙️ Plansza</button>`;
     }else if(state.playTool==='x'){
-      el.activeStrip.innerHTML=`<button class="person-chip active"><span class="person-dot" style="background:#dc2447">✕</span>Wykluczasz całe pola</button>`;
+      el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#dc2447">✕</span>Wykluczasz całe pola</button>`;
     }else if(state.playTool==='inspect'){
-      el.activeStrip.innerHTML=`<button class="person-chip active"><span class="person-dot" style="background:#475569">☝️</span>Dotknij pola, aby je podejrzeć</button>`;
+      el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#475569">☝️</span>Dotknij pola, aby je podejrzeć</button>`;
     }else{
-      el.activeStrip.innerHTML=`<button class="person-chip" data-action="people">＋ osoby</button>`+peopleForStrip().map(p=>`<button class="person-chip ${p.id===state.activePersonId?'active':''}" data-person="${p.id}"><span class="person-dot" style="background:${esc(p.color)}">${esc(p.code)}</span>${esc(p.name)}</button>`).join('');
+      const people=peopleForStrip();if(state.playTool==='candidate'&&!people.some(p=>p.id===state.activePersonId))state.activePersonId=people[0]?.id||null;
+      el.activeStrip.innerHTML=`<button class="person-chip" data-action="people">＋ osoby</button>`+people.map(p=>`<button class="person-chip ${p.id===state.activePersonId?'active':''}" data-person="${p.id}"><span class="person-dot" style="background:${esc(p.color)}">${esc(p.code)}</span>${esc(p.name)}</button>`).join('');
     }
   }
   function renderBoard(){
@@ -548,12 +547,11 @@
   el.board.addEventListener('click',e=>{const b=e.target.closest('.cell');if(b)cellTap(Number(b.dataset.index))});
   el.buildMode.onclick=()=>{state.mode='build';renderAll();saveSoon()};el.playMode.onclick=()=>{state.mode='play';state.clearMode=false;renderAll();saveSoon()};
   el.buildTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.buildTool=b.dataset.tool;state.clearMode=false;renderAll();saveSoon()});
-  el.playTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.playTool=b.dataset.tool;renderAll();saveSoon()});
+  el.playTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.playTool=b.dataset.tool;if(state.playTool==='candidate'){const visible=peopleForStrip();if(!visible.some(p=>p.id===state.activePersonId))state.activePersonId=visible[0]?.id||null}renderAll();saveSoon()});
   el.filterBar.addEventListener('click',e=>{const b=e.target.closest('[data-display]');if(!b)return;const key=b.dataset.display;state.display[key]=!state.display[key];renderAll();saveSoon()});
   el.activeStrip.addEventListener('click',e=>{const r=e.target.closest('[data-room]'),o=e.target.closest('[data-object]'),p=e.target.closest('[data-person]'),a=e.target.closest('[data-action]');if(r){state.activeRoomId=r.dataset.room;state.clearMode=false;renderStrip();saveSoon()}else if(o){state.activeObjectId=o.dataset.object;state.clearMode=false;renderStrip();saveSoon()}else if(p){state.activePersonId=p.dataset.person;renderAll();saveSoon()}else if(a){if(a.dataset.action==='clear-mode'){state.clearMode=!state.clearMode;renderAll();saveSoon();toast(state.clearMode?'Tryb czyszczenia: dotknij pola.':'Tryb czyszczenia wyłączony.');return}({rooms:roomsSheet,objects:objectsSheet,people:peopleSheet,setup:setupSheet,cell:()=>state.selected==null?toast('Najpierw wybierz pole.'):openCellSheet(state.selected)})[a.dataset.action]?.()}});
   el.menu.onclick=menuSheet;el.closeSheet.onclick=closeSheet;el.backdrop.onclick=closeSheet;
   el.title.addEventListener('input',e=>{state.title=e.target.value;saveSoon()});
-  el.victimCell.onclick=()=>{const v=state.people.find(p=>p.victim);if(!v)return;state.activePersonId=v.id;state.playTool='final';renderAll();toast('Wybierz finalne pole ofiary.')};
   el.importInput.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);snapshot();state=x;normalize();renderAll();saveSoon();closeSheet();toast('Projekt zaimportowany.')}catch(err){toast('Niepoprawny plik projektu.')}};reader.readAsText(f);e.target.value=''});
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
   window.addEventListener('resize',()=>{fitCellSize()});
