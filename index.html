@@ -77,12 +77,13 @@
     .mark.person-match{outline:2px solid currentColor;box-shadow:0 0 0 2px rgba(255,255,255,.95);transform:scale(1.12)}
     .mark.x{color:#dc2447;font-size:calc(var(--cell-size) * .19)}
     .mark.auto{background:rgba(251,113,133,.12);color:#9f1239}
-    .cell.person-focus::after{content:"";position:absolute;inset:3px;border:3px solid var(--accent2);border-radius:7px;box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 12px rgba(34,211,238,.72);z-index:12;pointer-events:none}
-    .edge-window{position:absolute;z-index:6;pointer-events:none;width:76%;height:14px;left:12%;top:-3px;transform-origin:center}
-    .edge-window svg{display:block;width:100%;height:100%;overflow:visible}
-    .edge-window.bottom{top:calc(100% - 11px);transform:rotate(180deg)}
-    .edge-window.left{left:calc(-38% + 4px);top:calc(50% - 7px);transform:rotate(-90deg)}
-    .edge-window.right{left:calc(62% - 4px);top:calc(50% - 7px);transform:rotate(90deg)}
+    .cell.person-focus{border:4px solid var(--accent2)!important;z-index:13;box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 13px rgba(34,211,238,.78)}
+    .board-window{position:absolute;z-index:6;pointer-events:none;background:#e9f5ff;border:1px solid #334155;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.7);transform:translate(-50%,-50%)}
+    .board-window.horizontal{width:calc(var(--cell-size) * .76);height:8px}
+    .board-window.vertical{width:8px;height:calc(var(--cell-size) * .76)}
+    .board-window::after{content:"";position:absolute;background:#334155;border-radius:1px;opacity:.8}
+    .board-window.horizontal::after{width:1px;top:0;bottom:0;left:50%}
+    .board-window.vertical::after{height:1px;left:0;right:0;top:50%}
     .victim-result{margin:0 10px 8px;padding:10px 12px;border-radius:13px;border:1px solid var(--ok);background:rgba(52,211,153,.08);font-size:13px;line-height:1.35}
 
     .bottom{position:sticky;bottom:0;z-index:35;background:rgba(13,18,34,.97);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safeBottom))}
@@ -228,7 +229,6 @@
   const PERSON_COLORS=['#ef4444','#3b82f6','#10b981','#f97316','#a855f7','#06b6d4','#eab308','#ec4899','#14b8a6','#6366f1','#84cc16','#f43f5e','#0ea5e9','#8b5cf6'];
   const ROOM_COLORS=['#dbeafe','#dcfce7','#fef3c7','#fce7f3','#ede9fe','#cffafe','#ffedd5','#e0f2fe','#fae8ff','#ecfccb','#fee2e2','#ccfbf1'];
   const ROOM_NAME_PRESETS=['Salon','Łazienka','Kuchnia','Jadalnia','Sypialnia'];
-  const EDGE_WINDOW_SVG='<svg viewBox="0 0 100 16" focusable="false" aria-hidden="true"><rect x="1" y="1" width="98" height="14" rx="3" fill="#e9f5ff" stroke="#334155" stroke-width="2"/><path d="M50 1V15" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"/><path d="M4 12H96" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" opacity=".42"/></svg>';
   const DEFAULT_PEOPLE=[
     {id:'p1',name:'A',code:'A',color:'#ef4444',victim:false},
     {id:'p2',name:'B',code:'B',color:'#3b82f6',victim:false},
@@ -236,7 +236,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:14,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
+  const makeState=()=>({version:15,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
@@ -249,7 +249,7 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=14;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=15;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
@@ -259,6 +259,7 @@
     state.people=[...suspects,victim];
     const personIds=new Set(state.people.map(p=>p.id)),cellObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id)),need=state.rows*state.cols;state.cells=Array.isArray(state.cells)?state.cells.slice(0,need):[];while(state.cells.length<need)state.cells.push(makeCell());
     state.cells=state.cells.map(c=>{const source=c||{},marks={};Object.entries(source.marks||{}).forEach(([id,value])=>{if(value==='candidate'&&personIds.has(id))marks[id]='candidate'});return Object.assign(makeCell(),source,{objects:Array.isArray(source.objects)?source.objects.filter(id=>cellObjectIds.has(id)):[],windows:Array.isArray(source.windows)?source.windows.filter(side=>['top','right','bottom','left'].includes(side)):[],marks,final:personIds.has(source.final)?source.final:null,excluded:!!source.excluded})});
+    state.cells.forEach((cell,i)=>['right','bottom'].forEach(side=>{const neighbor=edgeNeighbor(i,side);if(!neighbor)return;const enabled=cell.windows.includes(side)||state.cells[neighbor.index].windows.includes(neighbor.opposite);setWindow(cell,side,enabled);setWindow(state.cells[neighbor.index],neighbor.opposite,enabled)}));
     if(!state.rooms.some(r=>r.id===state.activeRoomId))state.activeRoomId=state.rooms[0]?.id||null;
     const cellObjects=state.objects.filter(o=>!o.edge);if(!cellObjects.some(o=>o.id===state.activeObjectId))state.activeObjectId=cellObjects[0]?.id||null;
     if(!state.people.some(p=>p.id===state.activePersonId))state.activePersonId=state.people.find(p=>!p.victim)?.id||state.people[0]?.id||null;
@@ -281,7 +282,7 @@
   function edgeNeighbor(i,side){const p=rc(i),map={top:[p.r-1,p.c,'bottom'],right:[p.r,p.c+1,'left'],bottom:[p.r+1,p.c,'top'],left:[p.r,p.c-1,'right']},q=map[side];return q&&q[0]>=0&&q[1]>=0&&q[0]<state.rows&&q[1]<state.cols?{index:idx(q[0],q[1]),opposite:q[2]}:null}
   function hasWindow(i,side){if(state.cells[i]?.windows.includes(side))return true;const neighbor=edgeNeighbor(i,side);return !!neighbor&&state.cells[neighbor.index]?.windows.includes(neighbor.opposite)}
   function setWindow(cell,side,enabled){const k=cell.windows.indexOf(side);if(enabled&&k<0)cell.windows.push(side);if(!enabled&&k>=0)cell.windows.splice(k,1)}
-  function renderedWindows(i){const p=rc(i),sides=[];if(hasWindow(i,'top'))sides.push('top');if(hasWindow(i,'left'))sides.push('left');if(p.c===state.cols-1&&hasWindow(i,'right'))sides.push('right');if(p.r===state.rows-1&&hasWindow(i,'bottom'))sides.push('bottom');return sides}
+  function windowEdgesData(){const edges=[];state.cells.forEach((cell,i)=>{const p=rc(i);if(hasWindow(i,'top'))edges.push({orientation:'horizontal',x:p.c+.5,y:p.r});if(hasWindow(i,'left'))edges.push({orientation:'vertical',x:p.c,y:p.r+.5});if(p.c===state.cols-1&&hasWindow(i,'right'))edges.push({orientation:'vertical',x:p.c+1,y:p.r+.5});if(p.r===state.rows-1&&hasWindow(i,'bottom'))edges.push({orientation:'horizontal',x:p.c+.5,y:p.r+1})});return edges}
   function objectIcon(o){if(!o)return'';if(o.id==='table')return'<span class="table-icon" role="img" aria-label="Stół"></span>';return`<span class="emoji-icon">${esc(o.symbol)}</span>`}
   function labelMetrics(name){
     const cellSize=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'))||82;
@@ -457,10 +458,11 @@
           }
         }
       }
-      renderedWindows(i).forEach(side=>inner+=`<span class="edge-window ${side}" aria-hidden="true">${EDGE_WINDOW_SVG}</span>`);if(cell.note)inner+='<span class="note-dot"></span>';
+      if(cell.note)inner+='<span class="note-dot"></span>';
       const personFocused=!!focusPerson&&((state.display.finals&&cell.final===focusPerson)||(state.display.candidates&&cell.marks[focusPerson]==='candidate'));
       html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''} ${personFocused?'person-focus':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
+    const windows=windowEdgesData();if(windows.length){html+=windows.map(edge=>`<span class="board-window ${edge.orientation}" aria-hidden="true" style="left:calc(${edge.x} * var(--cell-size));top:calc(${edge.y} * var(--cell-size))"></span>`).join('')}
     if(roomLabels.length){
       html += roomLabels.map(label=>`<div class="room-label ${label.className}" title="${esc(label.room.name)}" style="${label.style}">${label.html}</div>`).join('');
     }
