@@ -53,7 +53,7 @@
     .cell.conflict{box-shadow:inset 0 0 0 5px var(--danger);z-index:5}
     .cell.blocked{background:repeating-linear-gradient(135deg,#172033 0 8px,#26334a 8px 16px);color:#e7ecf7}
     .cell.auto-blocked:not(.blocked){background:#fff1f3}
-    .room-label{position:absolute;z-index:1;display:flex;align-items:flex-end;justify-content:flex-end;padding:3px 7px;border:1px solid rgba(15,23,42,.22);border-radius:10px;background:rgba(255,255,255,.78);box-shadow:0 1px 3px rgba(15,23,42,.10);color:#000;font-size:var(--label-font-size,clamp(8px,calc(var(--cell-size) * .118),11px));line-height:1.08;font-weight:950;text-transform:uppercase;text-align:right;pointer-events:none;overflow:hidden}
+    .room-label{position:absolute;z-index:20;display:flex;align-items:flex-end;justify-content:flex-end;padding:3px 7px;border:1px solid rgba(15,23,42,.22);border-radius:10px;background:rgba(255,255,255,.78);box-shadow:0 1px 3px rgba(15,23,42,.10);color:#000;font-size:var(--label-font-size,clamp(8px,calc(var(--cell-size) * .118),11px));line-height:1.08;font-weight:950;text-transform:uppercase;text-align:right;pointer-events:none;overflow:hidden}
     .room-label.one-line{white-space:nowrap;max-height:1.55em}
     .room-label.two-lines{white-space:normal;max-height:2.45em}
     .objects{position:absolute;inset:3px;display:flex;justify-content:center;align-items:center;gap:0;flex-wrap:wrap;line-height:1;z-index:3;filter:drop-shadow(0 2px 2px rgba(255,255,255,.95)) drop-shadow(0 1px 1px rgba(15,23,42,.22));pointer-events:none}
@@ -74,8 +74,16 @@
     .mark.candidate{background:rgba(255,255,255,.88)}
     .mark.x{color:#dc2447;font-size:calc(var(--cell-size) * .19)}
     .mark.auto{background:rgba(251,113,133,.12);color:#9f1239}
-    .edge-window{position:absolute;z-index:11;pointer-events:none;background:#e9f5ff;border:2px solid #334155;border-radius:4px;display:grid;place-items:center;color:#0f172a;font-size:12px;font-weight:900}
-    .edge-window.top{width:40%;height:10px;top:-5px;left:30%}.edge-window.bottom{width:40%;height:10px;bottom:-5px;left:30%}.edge-window.left{height:40%;width:10px;left:-5px;top:30%}.edge-window.right{height:40%;width:10px;right:-5px;top:30%}
+    .edge-window{position:absolute;z-index:11;pointer-events:none;background:#e9f5ff;border:2px solid #334155;border-radius:4px;display:block;color:transparent;font-size:0;box-shadow:0 0 0 1px rgba(255,255,255,.72)}
+    .edge-window::before,.edge-window::after{content:"";position:absolute;background:#334155;border-radius:2px}
+    .edge-window.top,.edge-window.bottom{width:42%;height:12px;left:29%}
+    .edge-window.top{top:-2px}.edge-window.bottom{bottom:-2px;transform:rotate(180deg)}
+    .edge-window.top::before,.edge-window.bottom::before{width:2px;top:0;bottom:0;left:calc(50% - 1px)}
+    .edge-window.top::after,.edge-window.bottom::after{height:2px;left:3px;right:3px;bottom:1px;opacity:.42}
+    .edge-window.left,.edge-window.right{height:42%;width:12px;top:29%}
+    .edge-window.left{left:-2px}.edge-window.right{right:-2px}
+    .edge-window.left::before,.edge-window.right::before{height:2px;left:0;right:0;top:calc(50% - 1px)}
+    .edge-window.left::after,.edge-window.right::after{width:2px;top:3px;bottom:3px;right:1px;opacity:.42}
     .victim-result{margin:0 10px 8px;padding:10px 12px;border-radius:13px;border:1px solid var(--ok);background:rgba(52,211,153,.08);font-size:13px;line-height:1.35}
 
     .bottom{position:sticky;bottom:0;z-index:35;background:rgba(13,18,34,.97);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safeBottom))}
@@ -103,6 +111,10 @@
     .field input,.field textarea,.field select{width:100%;min-height:44px;border:1px solid var(--line);background:#0e1526;color:var(--text);border-radius:11px;padding:10px 11px;outline:none}
     .field textarea{min-height:100px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
     .field input[readonly]{opacity:.72;background:#182137}
+    .preset-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:1px 0 2px}
+    .preset-row::-webkit-scrollbar{display:none}
+    .preset-badge{flex:none;min-height:30px;border:1px solid var(--line);background:#182137;color:var(--text);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850}
+    .preset-badge:active{border-color:var(--accent);background:rgba(139,92,246,.2)}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
     .btn{min-height:44px;border:1px solid var(--line);background:var(--panel2);border-radius:11px;padding:9px 11px;font-weight:850}
     .btn:disabled{opacity:.45}
@@ -207,6 +219,7 @@
   const PERSON_CODES='ABCDEFGHIJKLMN'.split('');
   const PERSON_COLORS=['#ef4444','#3b82f6','#10b981','#f97316','#a855f7','#06b6d4','#eab308','#ec4899','#14b8a6','#6366f1','#84cc16','#f43f5e','#0ea5e9','#8b5cf6'];
   const ROOM_COLORS=['#dbeafe','#dcfce7','#fef3c7','#fce7f3','#ede9fe','#cffafe','#ffedd5','#e0f2fe','#fae8ff','#ecfccb','#fee2e2','#ccfbf1'];
+  const ROOM_NAME_PRESETS=['Salon','Łazienka','Kuchnia','Jadalnia','Sypialnia'];
   const DEFAULT_PEOPLE=[
     {id:'p1',name:'A',code:'A',color:'#ef4444',victim:false},
     {id:'p2',name:'B',code:'B',color:'#3b82f6',victim:false},
@@ -214,7 +227,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:10,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},clues:''});
+  const makeState=()=>({version:11,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
@@ -227,7 +240,7 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=10;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=11;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
     const rawPeople=Array.isArray(state.people)?state.people:d.people,victim=rawPeople.find(p=>p&&p.victim)||clone(DEFAULT_PEOPLE[3]),suspects=rawPeople.filter(p=>p&&!p.victim).slice(0,PERSON_CODES.length);
@@ -427,7 +440,7 @@
           }
         }
       }
-      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}">│</span>`);if(cell.note)inner+='<span class="note-dot"></span>';
+      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}" aria-hidden="true"></span>`);if(cell.note)inner+='<span class="note-dot"></span>';
       html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     if(roomLabels.length){
@@ -518,7 +531,7 @@
     $('#savePerson').onclick=()=>{const name=$('#personName').value.trim();if(!name){toast('Podaj nazwę.');return}change(()=>{if(id){const target=getPerson(id);if(target)Object.assign(target,{name,color:$('#personColor').value})}else{const assignedCode=nextPersonCode();if(!assignedCode)return;const n={id:uid('person'),name,code:assignedCode,color:$('#personColor').value,victim:false},victimIndex=state.people.findIndex(person=>person.victim);state.people.splice(victimIndex<0?state.people.length:victimIndex,0,n);state.activePersonId=n.id}});peopleSheet()};
   }
   function roomsSheet(){openSheet('Pokoje',`<div class="list">${state.rooms.map(r=>`<div class="list-row"><span style="width:34px;height:34px;border-radius:9px;background:${esc(r.color)}"></span><div><strong>${esc(r.name)}</strong><small>Dotknij narzędzia „Pokój”, aby malować pola</small></div><div class="actions"><button class="tiny" data-edit-room="${r.id}">✏️</button><button class="tiny" data-del-room="${r.id}">🗑</button></div></div>`).join('')}</div><button class="btn primary full" id="addRoom" style="margin-top:10px">＋ Dodaj pokój</button>`);$$('[data-edit-room]',el.sheetBody).forEach(b=>b.onclick=()=>roomForm(b.dataset.editRoom));$$('[data-del-room]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delRoom;change(()=>{state.rooms=state.rooms.filter(r=>r.id!==id);state.cells.forEach(c=>{if(c.roomId===id)c.roomId=null})});roomsSheet()});$('#addRoom').onclick=()=>roomForm(null)}
-  function roomForm(id){const r=id?getRoom(id):{name:'',color:nextRoomColor()};openSheet(id?'Edytuj pokój':'Nowy pokój',`<div class="field"><label>Nazwa</label><input id="roomName" value="${esc(r.name)}" placeholder="Np. Salon"></div><div class="field"><label>Kolor pól</label><input id="roomColor" type="color" value="${esc(r.color)}"></div><button class="btn primary full" id="saveRoom">Zapisz</button>`);$('#saveRoom').onclick=()=>{const name=$('#roomName').value.trim();if(!name){toast('Podaj nazwę pokoju.');return}change(()=>{if(id)Object.assign(getRoom(id),{name,color:$('#roomColor').value});else{const n={id:uid('room'),name,color:$('#roomColor').value};state.rooms.push(n);state.activeRoomId=n.id}});roomsSheet()}}
+  function roomForm(id){const r=id?getRoom(id):{name:'',color:nextRoomColor()};openSheet(id?'Edytuj pokój':'Nowy pokój',`<div class="field"><label>Nazwa</label><input id="roomName" value="${esc(r.name)}" placeholder="Np. Salon"><div class="preset-row" aria-label="Standardowe nazwy pokojów">${ROOM_NAME_PRESETS.map(name=>`<button type="button" class="preset-badge" data-room-name="${esc(name)}">${esc(name)}</button>`).join('')}</div></div><div class="field"><label>Kolor pól</label><input id="roomColor" type="color" value="${esc(r.color)}"></div><button class="btn primary full" id="saveRoom">Zapisz</button>`);$$('[data-room-name]',el.sheetBody).forEach(b=>b.onclick=()=>{$('#roomName').value=b.dataset.roomName;$('#roomName').focus()});$('#saveRoom').onclick=()=>{const name=$('#roomName').value.trim();if(!name){toast('Podaj nazwę pokoju.');return}change(()=>{if(id)Object.assign(getRoom(id),{name,color:$('#roomColor').value});else{const n={id:uid('room'),name,color:$('#roomColor').value};state.rooms.push(n);state.activeRoomId=n.id}});roomsSheet()}}
   function objectsSheet(){openSheet('Przedmioty',`<p class="hint"><span class="ok-text">Dozwolone:</span> fotel/krzesło, dywan, łóżko. <span class="danger-text">Niedozwolone:</span> stół, telewizor, roślina, regał i pudło. Okno ustawia się na krawędzi.</p><div class="list">${state.objects.map(o=>`<div class="list-row"><span style="font-size:32px;display:grid;place-items:center;width:40px;height:40px">${objectIcon(o)}</span><div><strong>${esc(o.name)}</strong><small>${o.edge?'Obiekt krawędziowy':o.occupiable?'Może być zajęty':'Nie może być zajęty'}</small></div><div class="actions">${o.builtin?'':`<button class="tiny" data-edit-object="${o.id}">✏️</button><button class="tiny" data-del-object="${o.id}">🗑</button>`}</div></div>`).join('')}</div><button class="btn primary full" id="addObject" style="margin-top:10px">＋ Dodaj własny przedmiot</button>`);$$('[data-edit-object]',el.sheetBody).forEach(b=>b.onclick=()=>objectForm(b.dataset.editObject));$$('[data-del-object]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delObject;change(()=>{state.objects=state.objects.filter(o=>o.id!==id);state.cells.forEach(c=>c.objects=c.objects.filter(x=>x!==id))});objectsSheet()});$('#addObject').onclick=()=>objectForm(null)}
   function objectForm(id){const o=id?getObj(id):{name:'',symbol:'◆',occupiable:true};openSheet(id?'Edytuj przedmiot':'Nowy przedmiot',`<div class="field"><label>Nazwa</label><input id="objName" value="${esc(o.name)}"></div><div class="field"><label>Emoji lub krótki symbol</label><input id="objSymbol" value="${esc(o.symbol)}" maxlength="4"></div><label class="toggle"><input id="objOcc" type="checkbox" ${o.occupiable?'checked':''}><span>Osoba może zajmować pole z tym przedmiotem</span></label><button class="btn primary full" id="saveObject">Zapisz</button>`);$('#saveObject').onclick=()=>{const name=$('#objName').value.trim(),symbol=$('#objSymbol').value.trim();if(!name||!symbol){toast('Podaj nazwę i symbol.');return}change(()=>{if(id)Object.assign(getObj(id),{name,symbol,occupiable:$('#objOcc').checked});else{const n={id:uid('obj'),name,symbol,occupiable:$('#objOcc').checked,edge:false,builtin:false};state.objects.push(n);state.activeObjectId=n.id}});objectsSheet()}}
   function rulesSheet(){openSheet('Reguły i wskazówki',`<div class="section"><label class="toggle"><input id="autoX" type="checkbox" ${state.rules.autoX?'checked':''}><span>Pokazuj automatyczne X</span></label><label class="toggle"><input id="rowsCols" type="checkbox" ${state.rules.uniqueRowsCols?'checked':''}><span>Każda osoba w innym wierszu i kolumnie</span></label><label class="toggle"><input id="uniquePeople" type="checkbox" ${state.rules.uniquePeople?'checked':''}><span>Każda osoba tylko raz na planszy</span></label><label class="toggle"><input id="equip" type="checkbox" ${state.rules.forbidEquipment?'checked':''}><span>Blokuj stół, TV, roślinę, regał i pudło</span></label></div><div class="field"><label>Opis wskazówek z książki</label><textarea id="clues" placeholder="Przepisz wskazówki…">${esc(state.clues)}</textarea></div><button class="btn primary full" id="saveRules">Zapisz</button>`);$('#saveRules').onclick=()=>{change(()=>{state.rules.autoX=$('#autoX').checked;state.rules.uniqueRowsCols=$('#rowsCols').checked;state.rules.uniquePeople=$('#uniquePeople').checked;state.rules.forbidEquipment=$('#equip').checked;state.clues=$('#clues').value});closeSheet()}}
@@ -527,10 +540,9 @@
   function placeVictimLast(){
     const victim=state.people.find(p=>p.victim);if(!victim){toast('Brak ofiary.');return}const usedR=new Set(),usedC=new Set();state.cells.forEach((c,i)=>{if(c.final){const p=rc(i);usedR.add(p.r);usedC.add(p.c)}});const freeR=[];for(let r=0;r<state.rows;r++)if(!usedR.has(r))freeR.push(r);const freeC=[];for(let c=0;c<state.cols;c++)if(!usedC.has(c))freeC.push(c);if(freeR.length!==1||freeC.length!==1){toast('Musi pozostać dokładnie jeden wolny wiersz i jedna kolumna.');return}const i=idx(freeR[0],freeC[0]),reason=constraintReason(i,victim.id);if(reason&&state.cells[i].final!==victim.id){toast(reason);return}change(()=>state.cells[i].final=victim.id);closeSheet();toast('Ofiara ustawiona na ostatnim wolnym polu.')
   }
-  async function exportProject(){
+  function exportProject(){
     const data=JSON.stringify(state,null,2),name=(state.title.trim()||'murdoku').replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ_-]+/g,'_')+'.json';
-    try{const file=new File([data],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:state.title,files:[file]});return}}catch(e){}
-    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Eksport przygotowany.')
+    const url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Zapisano plik JSON.')
   }
 
   el.board.addEventListener('click',e=>{const b=e.target.closest('.cell');if(b)cellTap(Number(b.dataset.index))});
