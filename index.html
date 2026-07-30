@@ -58,24 +58,27 @@
     .room-label.one-line{white-space:nowrap;max-height:1.55em}
     .room-label.two-lines{white-space:normal;max-height:2.45em}
     .objects{position:absolute;inset:3px;display:flex;justify-content:center;align-items:center;gap:0;flex-wrap:wrap;line-height:1;z-index:3;filter:drop-shadow(0 2px 2px rgba(255,255,255,.95)) drop-shadow(0 1px 1px rgba(15,23,42,.22));pointer-events:none}
-    .object-badge{display:inline-grid;place-items:center;width:48%;height:48%;min-width:0;min-height:0;font-size:calc(var(--cell-size) * .32);line-height:1}
-    .objects.count-1 .object-badge{width:100%;height:100%;font-size:calc(var(--cell-size) * .50)}
-    .objects.count-2 .object-badge{width:49%;height:94%;font-size:calc(var(--cell-size) * .39)}
-    .objects.count-many .object-badge{font-size:calc(var(--cell-size) * .27)}
+    .object-badge{display:inline-grid;place-items:center;width:48%;height:48%;min-width:0;min-height:0;font-size:calc(var(--cell-size) * .38);line-height:1}
+    .objects.count-1 .object-badge{width:100%;height:100%;font-size:calc(var(--cell-size) * .62)}
+    .objects.count-2 .object-badge{width:49%;height:94%;font-size:calc(var(--cell-size) * .47)}
+    .objects.count-many .object-badge{font-size:calc(var(--cell-size) * .32)}
     .emoji-icon{display:inline-grid;place-items:center;line-height:1}
     .table-icon{position:relative;display:inline-block;width:1em;height:.78em;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(15,23,42,.2))}
     .table-icon::before{content:"";position:absolute;left:5%;right:5%;top:7%;height:31%;border:2px solid #5b371d;border-radius:.11em;background:linear-gradient(#b97a46,#8b572f);box-shadow:inset 0 2px 0 rgba(255,255,255,.3)}
     .table-icon::after{content:"";position:absolute;left:13%;right:13%;top:39%;bottom:4%;background:linear-gradient(90deg,#5b371d 0 14%,transparent 14% 86%,#5b371d 86% 100%)}
     .note-dot{position:absolute;right:4px;bottom:4px;width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 2px white;z-index:8}
     .final-token{position:absolute;inset:10%;z-index:8;border-radius:50%;display:grid;place-items:center;border:3px solid rgba(255,255,255,.95);box-shadow:0 5px 13px rgba(0,0,0,.3);font-size:calc(var(--cell-size) * .33);font-weight:1000;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.3)}
+    .final-token.person-match{box-shadow:0 0 0 4px var(--accent2),0 5px 13px rgba(0,0,0,.35)}
     .cell-x{position:absolute;inset:12%;z-index:9;display:grid;place-items:center;font-size:calc(var(--cell-size) * .72);font-weight:1000;line-height:1;color:#dc2447;text-shadow:0 2px 0 rgba(255,255,255,.95),0 -2px 0 rgba(255,255,255,.95),2px 0 0 rgba(255,255,255,.95),-2px 0 0 rgba(255,255,255,.95);pointer-events:none}
     .cell-x.auto{color:#9f1239;opacity:.9}
     .marks{position:absolute;top:4px;left:4px;right:6px;bottom:6px;z-index:7;display:grid;grid-template-columns:repeat(var(--mark-cols),max-content);grid-auto-rows:max-content;grid-auto-flow:row;gap:3px 4px;align-content:start;justify-content:start;pointer-events:none}
     .mark{display:grid;place-items:center;min-width:0;min-height:0;padding:1px 3px;border-radius:4px;font-size:calc(var(--cell-size) * .15);font-weight:1000;line-height:1;overflow:hidden}
     .mark.candidate{background:rgba(255,255,255,.88)}
+    .mark.person-match{outline:2px solid currentColor;box-shadow:0 0 0 2px rgba(255,255,255,.95);transform:scale(1.12)}
     .mark.x{color:#dc2447;font-size:calc(var(--cell-size) * .19)}
     .mark.auto{background:rgba(251,113,133,.12);color:#9f1239}
-    .edge-window{position:absolute;z-index:11;pointer-events:none;width:76%;height:14px;left:12%;top:-3px;transform-origin:center}
+    .cell.person-focus::after{content:"";position:absolute;inset:3px;border:3px solid var(--accent2);border-radius:7px;box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 12px rgba(34,211,238,.72);z-index:12;pointer-events:none}
+    .edge-window{position:absolute;z-index:6;pointer-events:none;width:76%;height:14px;left:12%;top:-3px;transform-origin:center}
     .edge-window svg{display:block;width:100%;height:100%;overflow:visible}
     .edge-window.bottom{top:calc(100% - 11px);transform:rotate(180deg)}
     .edge-window.left{left:calc(-38% + 4px);top:calc(50% - 7px);transform:rotate(-90deg)}
@@ -91,6 +94,9 @@
     .person-dot{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:1000;text-shadow:0 1px 2px rgba(0,0,0,.4)}
     .tool-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
     #playTools{grid-template-columns:repeat(4,1fr)}
+    .history-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;margin-top:6px}
+    .history-btn{width:100%;min-height:40px;border:1px solid var(--line);background:var(--panel);border-radius:11px;color:var(--text);font-weight:900}
+    .history-btn:disabled{opacity:.38}
     .tool{min-width:0;min-height:50px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:5px 2px;color:var(--muted);font-size:10px;font-weight:900;display:grid;place-items:center;line-height:1.05}
     .tool span{display:block;font-size:20px;margin-bottom:2px;color:var(--text)}
     .tool.active{border-color:var(--accent);background:rgba(139,92,246,.2);color:#fff}
@@ -179,6 +185,10 @@
       <button class="tool" data-tool="final"><span>●</span>Finalnie</button>
       <button class="tool" data-tool="inspect"><span>☝️</span>Podgląd</button>
     </div>
+    <div class="history-row" id="playHistory" hidden>
+      <button class="history-btn" id="playUndoBtn">↶ Cofnij</button>
+      <button class="history-btn" id="playRedoBtn">↷ Ponów</button>
+    </div>
   </footer>
 </div>
 
@@ -226,20 +236,20 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:13,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
+  const makeState=()=>({version:14,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
   normalize();
 
   const el={
-    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
+    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),playHistory:$('#playHistory'),playUndo:$('#playUndoBtn'),playRedo:$('#playRedoBtn'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
   };
 
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=13;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=14;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
@@ -268,6 +278,10 @@
   function peopleForStrip(){const placed=new Set(state.cells.map(c=>c.final).filter(Boolean)),people=[...state.people];if(state.mode==='play'&&state.playTool==='candidate')return people.filter(p=>!placed.has(p.id));if(state.mode==='play'&&state.playTool==='final')people.sort((a,b)=>Number(placed.has(a.id))-Number(placed.has(b.id))||Number(a.victim)-Number(b.victim)||String(a.code).localeCompare(String(b.code),'pl'));return people}
   function rc(i){return{r:Math.floor(i/state.cols),c:i%state.cols}}
   function idx(r,c){return r*state.cols+c}
+  function edgeNeighbor(i,side){const p=rc(i),map={top:[p.r-1,p.c,'bottom'],right:[p.r,p.c+1,'left'],bottom:[p.r+1,p.c,'top'],left:[p.r,p.c-1,'right']},q=map[side];return q&&q[0]>=0&&q[1]>=0&&q[0]<state.rows&&q[1]<state.cols?{index:idx(q[0],q[1]),opposite:q[2]}:null}
+  function hasWindow(i,side){if(state.cells[i]?.windows.includes(side))return true;const neighbor=edgeNeighbor(i,side);return !!neighbor&&state.cells[neighbor.index]?.windows.includes(neighbor.opposite)}
+  function setWindow(cell,side,enabled){const k=cell.windows.indexOf(side);if(enabled&&k<0)cell.windows.push(side);if(!enabled&&k>=0)cell.windows.splice(k,1)}
+  function renderedWindows(i){const p=rc(i),sides=[];if(hasWindow(i,'top'))sides.push('top');if(hasWindow(i,'left'))sides.push('left');if(p.c===state.cols-1&&hasWindow(i,'right'))sides.push('right');if(p.r===state.rows-1&&hasWindow(i,'bottom'))sides.push('bottom');return sides}
   function objectIcon(o){if(!o)return'';if(o.id==='table')return'<span class="table-icon" role="img" aria-label="Stół"></span>';return`<span class="emoji-icon">${esc(o.symbol)}</span>`}
   function labelMetrics(name){
     const cellSize=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'))||82;
@@ -397,7 +411,7 @@
 
   function renderAll(){fitCellSize();renderMode();renderFilters();renderStrip();renderBoard();renderMurderer()}
   function renderMode(){
-    const build=state.mode==='build';el.buildMode.classList.toggle('active',build);el.playMode.classList.toggle('active',!build);el.buildTools.hidden=!build;el.playTools.hidden=build;el.title.value=state.title;
+    const build=state.mode==='build';el.buildMode.classList.toggle('active',build);el.playMode.classList.toggle('active',!build);el.buildTools.hidden=!build;el.playTools.hidden=build;el.playHistory.hidden=build;el.playUndo.disabled=!history.length;el.playRedo.disabled=!future.length;el.title.value=state.title;
     $$('#buildTools .tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.buildTool));$$('#playTools .tool[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.playTool));
   }
   function renderFilters(){
@@ -423,7 +437,7 @@
     }
   }
   function renderBoard(){
-    el.board.style.setProperty('--cols',state.cols);const markCols=Math.max(2,Math.min(4,Math.ceil(Math.sqrt(Math.max(1,state.people.length))))),bad=conflicts(),roomLabels=roomLabelsData();let html='';
+    el.board.style.setProperty('--cols',state.cols);const markCols=Math.max(2,Math.min(4,Math.ceil(Math.sqrt(Math.max(1,state.people.length))))),bad=conflicts(),roomLabels=roomLabelsData(),focusPerson=state.mode==='play'&&['candidate','final'].includes(state.playTool)?state.activePersonId:null;let html='';
     state.cells.forEach((cell,i)=>{
       const room=getRoom(cell.roomId),b=roomBorders(i),style=[`border-top:${b.top?'4px':'1px'} solid ${b.top?'#1f2937':'#8e9bad'}`,`border-right:${b.right?'4px':'1px'} solid ${b.right?'#1f2937':'#8e9bad'}`,`border-bottom:${b.bottom?'4px':'1px'} solid ${b.bottom?'#1f2937':'#8e9bad'}`,`border-left:${b.left?'4px':'1px'} solid ${b.left?'#1f2937':'#8e9bad'}`];if(room)style.push(`background-color:${esc(room.color)}`);
       const autoCell=cellAutoReason(i),blockedByObject=objectBlocks(cell);let inner='';
@@ -433,18 +447,19 @@
           if(objectList.length){const objs=objectList.map(o=>`<span class="object-badge" title="${esc(o.name)}">${objectIcon(o)}</span>`).join('');inner+=`<div class="objects ${countClass}">${objs}</div>`}
         }
         if(state.mode==='play'){
-          if(cell.final){if(state.display.finals){const p=getPerson(cell.final);if(p)inner+=`<div class="final-token" style="background:${esc(p.color)}">${esc(p.code)}</div>`}}
+          if(cell.final){if(state.display.finals){const p=getPerson(cell.final);if(p)inner+=`<div class="final-token ${focusPerson===p.id?'person-match':''}" style="background:${esc(p.color)}">${esc(p.code)}</div>`}}
           else if((cell.excluded||autoCell)&&state.display.excluded)inner+=`<div class="cell-x ${autoCell&&!cell.excluded?'auto':''}" title="${esc(cell.excluded?'Pole wykluczone':autoCell)}">×</div>`;
           else if(!blockedByObject&&state.display.candidates){
             const candidates=state.people.filter(p=>cell.marks[p.id]==='candidate');
             if(candidates.length){
-              inner+=`<div class="marks" style="--mark-cols:${markCols}">` + candidates.map(p=>`<div class="mark candidate" style="color:${esc(p.color)}">${esc(p.code)}</div>`).join('') + `</div>`;
+              inner+=`<div class="marks" style="--mark-cols:${markCols}">` + candidates.map(p=>`<div class="mark candidate ${focusPerson===p.id?'person-match':''}" style="color:${esc(p.color)}">${esc(p.code)}</div>`).join('') + `</div>`;
             }
           }
         }
       }
-      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}" aria-hidden="true">${EDGE_WINDOW_SVG}</span>`);if(cell.note)inner+='<span class="note-dot"></span>';
-      html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
+      renderedWindows(i).forEach(side=>inner+=`<span class="edge-window ${side}" aria-hidden="true">${EDGE_WINDOW_SVG}</span>`);if(cell.note)inner+='<span class="note-dot"></span>';
+      const personFocused=!!focusPerson&&((state.display.finals&&cell.final===focusPerson)||(state.display.candidates&&cell.marks[focusPerson]==='candidate'));
+      html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''} ${personFocused?'person-focus':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     if(roomLabels.length){
       html += roomLabels.map(label=>`<div class="room-label ${label.className}" title="${esc(label.room.name)}" style="${label.style}">${label.html}</div>`).join('');
@@ -500,11 +515,10 @@
   }
   function openWindowSheet(i){
     const cell=state.cells[i],pos=rc(i);openSheet(`Okno — pole ${pos.r+1}×${pos.c+1}`,`<p class="hint">Okno leży na pogrubionej linii, na brzegu planszy albo między dwoma polami. Dotknij krawędzi, aby przełączyć okno.</p><div class="edge-grid"><button class="top" data-edge="top">Góra</button><button class="left" data-edge="left">Lewo</button><button class="mid">${pos.r+1},${pos.c+1}</button><button class="right" data-edge="right">Prawo</button><button class="bottom" data-edge="bottom">Dół</button></div>`);
-    $$('[data-edge]',el.sheetBody).forEach(b=>{const side=b.dataset.edge;b.classList.toggle('active',cell.windows.includes(side));b.addEventListener('click',()=>{const adding=!state.cells[i].windows.includes(side);change(()=>toggleWindow(i,side));closeSheet();toast(adding?'Dodano okno.':'Usunięto okno.')})});
+    $$('[data-edge]',el.sheetBody).forEach(b=>{const side=b.dataset.edge;b.classList.toggle('active',hasWindow(i,side));b.addEventListener('click',()=>{const adding=!hasWindow(i,side);change(()=>toggleWindow(i,side));closeSheet();toast(adding?'Dodano okno.':'Usunięto okno.')})});
   }
   function toggleWindow(i,side){
-    const cell=state.cells[i],k=cell.windows.indexOf(side);if(k>=0)cell.windows.splice(k,1);else cell.windows.push(side);
-    const p=rc(i),map={top:[p.r-1,p.c,'bottom'],right:[p.r,p.c+1,'left'],bottom:[p.r+1,p.c,'top'],left:[p.r,p.c-1,'right']},q=map[side];if(q[0]>=0&&q[1]>=0&&q[0]<state.rows&&q[1]<state.cols){const other=state.cells[idx(q[0],q[1])],ok=other.windows.indexOf(q[2]);if(k>=0&&ok>=0)other.windows.splice(ok,1);if(k<0&&ok<0)other.windows.push(q[2])}
+    const enabled=!hasWindow(i,side),neighbor=edgeNeighbor(i,side);setWindow(state.cells[i],side,enabled);if(neighbor)setWindow(state.cells[neighbor.index],neighbor.opposite,enabled)
   }
 
   function menuSheet(){openSheet('Menu',`
@@ -557,6 +571,7 @@
   el.buildMode.onclick=()=>{state.mode='build';renderAll();saveSoon()};el.playMode.onclick=()=>{state.mode='play';state.clearMode=false;renderAll();saveSoon()};
   el.buildTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.buildTool=b.dataset.tool;state.clearMode=false;renderAll();saveSoon()});
   el.playTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.playTool=b.dataset.tool;if(state.playTool==='candidate'){const visible=peopleForStrip();if(!visible.some(p=>p.id===state.activePersonId))state.activePersonId=visible[0]?.id||null}renderAll();saveSoon()});
+  el.playUndo.onclick=undo;el.playRedo.onclick=redo;
   el.filterBar.addEventListener('click',e=>{const action=e.target.closest('[data-filter-action]');if(action){if(action.dataset.filterAction==='objects')objectFilterSheet();return}const b=e.target.closest('[data-display]');if(!b)return;const key=b.dataset.display;state.display[key]=!state.display[key];renderAll();saveSoon()});
   el.activeStrip.addEventListener('click',e=>{const r=e.target.closest('[data-room]'),o=e.target.closest('[data-object]'),p=e.target.closest('[data-person]'),a=e.target.closest('[data-action]');if(r){state.activeRoomId=r.dataset.room;state.clearMode=false;renderStrip();saveSoon()}else if(o){state.activeObjectId=o.dataset.object;state.clearMode=false;renderStrip();saveSoon()}else if(p){state.activePersonId=p.dataset.person;renderAll();saveSoon()}else if(a){if(a.dataset.action==='clear-mode'){state.clearMode=!state.clearMode;renderAll();saveSoon();toast(state.clearMode?'Tryb czyszczenia: dotknij pola.':'Tryb czyszczenia wyłączony.');return}({rooms:roomsSheet,objects:objectsSheet,people:peopleSheet,setup:setupSheet,cell:()=>state.selected==null?toast('Najpierw wybierz pole.'):openCellSheet(state.selected)})[a.dataset.action]?.()}});
   el.menu.onclick=menuSheet;el.closeSheet.onclick=closeSheet;el.backdrop.onclick=closeSheet;
