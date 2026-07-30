@@ -45,11 +45,16 @@
     .filter-chip.active{border-color:var(--accent);background:rgba(139,92,246,.2);color:#fff}
     .filter-chip.filtered{border-color:var(--warning);background:rgba(251,191,36,.14);color:#fff}
     .filter-chip:not(.active){opacity:.58}
+    .board-controls{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 10px;background:#0f1729;border-bottom:1px solid var(--line)}
+    .zoom-btn{min-height:34px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:5px 11px;font-size:13px;font-weight:900}
+    .zoom-btn.square{width:38px;padding:5px;font-size:18px}
+    .status-info{margin:7px 10px 0;padding:8px 10px;border:1px solid rgba(251,191,36,.48);border-radius:11px;background:rgba(251,191,36,.09);color:#fde68a;font-size:12px;line-height:1.35}
 
     .board-wrap{position:relative;flex:1;min-height:0;overflow:auto;padding:10px 10px 18px;display:flex;align-items:flex-start;justify-content:flex-start;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
     .board-shell{position:relative;margin:0 auto;border:2px solid #d8e0ef;border-radius:10px;overflow:hidden;background:#d5dce8;box-shadow:0 16px 36px rgba(0,0,0,.32);flex:none}
     .board{display:grid;grid-template-columns:repeat(var(--cols),var(--cell-size));position:relative;z-index:1}
-    .cell{position:relative;width:var(--cell-size);height:var(--cell-size);border:0;border-right:1px solid #8e9bad;border-bottom:1px solid #8e9bad;background:var(--cell);color:var(--cellText);padding:0;overflow:hidden;touch-action:manipulation}
+    .cell{position:relative;width:var(--cell-size);height:var(--cell-size);border:0;border-right:1px solid #8e9bad;border-bottom:1px solid #8e9bad;background:var(--cell);color:var(--cellText);padding:0;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+    .cell.paint-visited{filter:brightness(1.08);box-shadow:inset 0 0 0 3px rgba(34,211,238,.75)}
     .cell.selected{box-shadow:inset 0 0 0 4px var(--accent);z-index:4}
     .cell.conflict{box-shadow:inset 0 0 0 5px var(--danger);z-index:5}
     .cell.blocked{background:repeating-linear-gradient(135deg,#172033 0 8px,#26334a 8px 16px);color:#e7ecf7}
@@ -78,6 +83,9 @@
     .mark.x{color:#dc2447;font-size:calc(var(--cell-size) * .19)}
     .mark.auto{background:rgba(251,113,133,.12);color:#9f1239}
     .cell.person-focus{border:4px solid var(--accent2)!important;z-index:13;box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 13px rgba(34,211,238,.78)}
+    .board.focus-mode .mark.candidate:not(.person-match){opacity:.14;filter:grayscale(1)}
+    .board.focus-mode .final-token:not(.person-match){opacity:.3;filter:grayscale(.7) saturate(.45)}
+    .board.focus-mode .person-focus .objects{opacity:.72}
     .board-window{position:absolute;z-index:6;pointer-events:none;background:#e9f5ff;border:1px solid #334155;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.7);transform:translate(-50%,-50%)}
     .board-window.horizontal{width:calc(var(--cell-size) * .76);height:8px}
     .board-window.vertical{width:8px;height:calc(var(--cell-size) * .76)}
@@ -92,7 +100,11 @@
     .person-chip,.object-chip,.room-chip{flex:none;min-height:42px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:850}
     .instruction-chip{flex:1 0 100%;width:100%;justify-content:center}
     .person-chip.active,.object-chip.active,.room-chip.active{outline:2px solid var(--accent);border-color:transparent;background:#24204a}
+    .person-chip.focused{outline-color:var(--accent2);background:#123447}
     .person-dot{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:1000;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+    .person-count{min-width:24px;height:24px;padding:0 6px;border-radius:999px;display:grid;place-items:center;background:#0b1221;border:1px solid var(--line);font-size:11px;font-weight:950;color:#dbeafe}
+    .person-count.zero{border-color:var(--warning);color:#fde68a;background:rgba(251,191,36,.11)}
+    .focus-eye{font-size:13px;color:var(--accent2)}
     .tool-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
     #playTools{grid-template-columns:repeat(4,1fr)}
     .history-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;margin-top:6px}
@@ -130,6 +142,7 @@
     .toggle{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.35;margin:9px 0}.toggle input{width:20px;height:20px;accent-color:var(--accent);flex:none}
     .palette{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.palette button{min-height:54px;border:1px solid var(--line);background:#0e1526;border-radius:12px;font-size:22px}.palette button.active{outline:2px solid var(--accent)}
     .edge-grid{display:grid;grid-template-areas:"x top x2" "left mid right" "x3 bottom x4";grid-template-columns:1fr 1fr 1fr;gap:7px;max-width:230px;margin:auto}.edge-grid button{min-height:48px;border:1px solid var(--line);background:#0e1526;border-radius:11px;font-weight:900}.edge-grid .top{grid-area:top}.edge-grid .left{grid-area:left}.edge-grid .mid{grid-area:mid;background:var(--cell);color:var(--cellText)}.edge-grid .right{grid-area:right}.edge-grid .bottom{grid-area:bottom}
+    .quick-actions{display:grid;gap:8px}.quick-action{width:100%;min-height:46px;border:1px solid var(--line);background:#0e1526;border-radius:12px;padding:10px 12px;text-align:left;font-weight:850}.quick-action strong{display:block}.quick-action small{display:block;margin-top:2px;color:var(--muted);font-weight:650;line-height:1.3}.quick-reason{padding:9px 10px;margin-bottom:10px;border-radius:11px;border:1px solid rgba(251,191,36,.42);background:rgba(251,191,36,.08);color:#fde68a;font-size:12px;line-height:1.4}
     .toast{position:fixed;z-index:100;left:12px;right:12px;bottom:calc(92px + var(--safeBottom));padding:11px 13px;border-radius:13px;background:#07101f;border:1px solid #4a5c7e;color:#fff;box-shadow:0 14px 35px rgba(0,0,0,.4);opacity:0;transform:translateY(12px);pointer-events:none;transition:.18s;text-align:center;font-size:13px}.toast.show{opacity:1;transform:none}
     .hint{font-size:12px;color:var(--muted);line-height:1.45}.danger-text{color:#fecdd3}.ok-text{color:#a7f3d0}
     .help-list{padding-left:20px;color:#dbe5f8;font-size:13px;line-height:1.5}.help-list li{margin-bottom:7px}
@@ -138,7 +151,7 @@
       .app{max-width:1100px;margin:auto;border-left:1px solid var(--line);border-right:1px solid var(--line)}
       .topbar{padding-top:10px}.board-wrap{padding:20px}.sheet{left:50%;right:auto;width:min(620px,94vw);transform:translate(-50%,105%);border-radius:22px 22px 0 0}.sheet.open{transform:translate(-50%,0)}
     }
-    @media print{.topbar,.filterbar,.bottom,.victim-result{display:none!important}.app{display:block}.main{overflow:visible}.board-wrap{overflow:visible;padding:0}.board-shell{box-shadow:none;margin:auto}.cell{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+    @media print{.topbar,.filterbar,.board-controls,.status-info,.bottom,.victim-result{display:none!important}.app{display:block}.main{overflow:visible}.board-wrap{overflow:visible;padding:0}.board-shell{box-shadow:none;margin:auto}.cell{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style>
 </head>
 <body>
@@ -165,6 +178,12 @@
       <button class="filter-chip active" data-display="candidates" aria-pressed="true" aria-label="Wyświetlanie możliwych"><span>✎</span>Możliwe</button>
       <button class="filter-chip active" data-display="finals" aria-pressed="true" aria-label="Wyświetlanie finalnych"><span>●</span>Finalne</button>
     </div>
+    <div class="board-controls" aria-label="Powiększenie planszy">
+      <button class="zoom-btn square" id="zoomOutBtn" aria-label="Pomniejsz planszę">−</button>
+      <button class="zoom-btn" id="zoomFitBtn">Dopasuj · 100%</button>
+      <button class="zoom-btn square" id="zoomInBtn" aria-label="Powiększ planszę">＋</button>
+    </div>
+    <div class="status-info" id="statusInfo" hidden></div>
     <div class="victim-result" id="murdererBox" hidden></div>
     <div class="board-wrap" id="boardWrap">
       <div class="board-shell" id="boardShell"><div class="board" id="board"></div></div>
@@ -211,6 +230,7 @@
   const uid=(p='id')=>p+'_'+Math.random().toString(36).slice(2,10);
   const clone=o=>JSON.parse(JSON.stringify(o));
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const fieldWord=n=>n===1?'pole':n>=2&&n<=4?'pola':'pól';
   const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
   const DEFAULT_OBJECTS=[
@@ -236,20 +256,20 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:15,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
+  const makeState=()=>({version:16,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
-  let history=[],future=[],toastTimer=null,saveTimer=null;
+  let history=[],future=[],toastTimer=null,saveTimer=null,personTap={id:null,time:0},gesture=null,pinch=null,pinchFrame=0;
   normalize();
 
   const el={
-    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),playHistory:$('#playHistory'),playUndo:$('#playUndoBtn'),playRedo:$('#playRedoBtn'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
+    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),statusInfo:$('#statusInfo'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),zoomOut:$('#zoomOutBtn'),zoomFit:$('#zoomFitBtn'),zoomIn:$('#zoomInBtn'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),playHistory:$('#playHistory'),playUndo:$('#playUndoBtn'),playRedo:$('#playRedoBtn'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
   };
 
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=15;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=16;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
@@ -263,12 +283,13 @@
     if(!state.rooms.some(r=>r.id===state.activeRoomId))state.activeRoomId=state.rooms[0]?.id||null;
     const cellObjects=state.objects.filter(o=>!o.edge);if(!cellObjects.some(o=>o.id===state.activeObjectId))state.activeObjectId=cellObjects[0]?.id||null;
     if(!state.people.some(p=>p.id===state.activePersonId))state.activePersonId=state.people.find(p=>!p.victim)?.id||state.people[0]?.id||null;
+    if(!state.people.some(p=>p.id===state.focusPersonId))state.focusPersonId=null;
     if(state.selected!=null&&(state.selected<0||state.selected>=need))state.selected=null;
   }
   function snapshot(){history.push(JSON.stringify(state));if(history.length>60)history.shift();future=[]}
   function change(fn,render=true){snapshot();fn();normalize();if(render)renderAll();saveSoon()}
-  function undo(){if(!history.length)return;future.push(JSON.stringify(state));state=JSON.parse(history.pop());normalize();renderAll();saveSoon()}
-  function redo(){if(!future.length)return;history.push(JSON.stringify(state));state=JSON.parse(future.pop());normalize();renderAll();saveSoon()}
+  function undo(){if(!history.length)return;const ui={zoom:state.zoom,focusPersonId:state.focusPersonId};future.push(JSON.stringify(state));state=JSON.parse(history.pop());state.zoom=ui.zoom;state.focusPersonId=ui.focusPersonId;normalize();renderAll();saveSoon()}
+  function redo(){if(!future.length)return;const ui={zoom:state.zoom,focusPersonId:state.focusPersonId};history.push(JSON.stringify(state));state=JSON.parse(future.pop());state.zoom=ui.zoom;state.focusPersonId=ui.focusPersonId;normalize();renderAll();saveSoon()}
   function getObj(id){return state.objects.find(o=>o.id===id)}
   function getRoom(id){return state.rooms.find(r=>r.id===id)}
   function getPerson(id){return state.people.find(p=>p.id===id)}
@@ -277,6 +298,18 @@
   function nextPersonColor(){return randomUnusedColor(PERSON_COLORS,state.people.filter(p=>!p.victim).map(p=>p.color))}
   function nextRoomColor(){return randomUnusedColor(ROOM_COLORS,state.rooms.map(r=>r.color))}
   function peopleForStrip(){const placed=new Set(state.cells.map(c=>c.final).filter(Boolean)),people=[...state.people];if(state.mode==='play'&&state.playTool==='candidate')return people.filter(p=>!placed.has(p.id));if(state.mode==='play'&&state.playTool==='final')people.sort((a,b)=>Number(placed.has(a.id))-Number(placed.has(b.id))||Number(a.victim)-Number(b.victim)||String(a.code).localeCompare(String(b.code),'pl'));return people}
+  function personStats(personId){
+    const finalIndex=state.cells.findIndex(c=>c.final===personId),marked=[];state.cells.forEach((c,i)=>{if(c.marks[personId]==='candidate')marked.push(i)});
+    const available=marked.filter(i=>!constraintReason(i,personId)&&!state.cells[i].final);
+    return{finalIndex,marked:marked.length,available:available.length};
+  }
+  function personCount(personId){const stats=personStats(personId);return stats.finalIndex>=0?{text:'✓',zero:false,title:'Ustawiona finalnie'}:stats.marked?{text:String(stats.available),zero:stats.available===0,title:`${stats.available} z ${stats.marked} zaznaczonych pól nadal dostępnych`}:{text:'—',zero:false,title:'Nie zaznaczono jeszcze możliwych pól'}}
+  function candidateWarnings(){return state.people.map(p=>({person:p,stats:personStats(p.id)})).filter(x=>x.stats.finalIndex<0&&x.stats.marked>0&&x.stats.available===0)}
+  function fillRoomZone(start,roomId){
+    const first=state.cells[start];if(!first||first.blocked||first.roomId)return[];const result=[],seen=new Set([start]),queue=[start],steps=[[1,0],[-1,0],[0,1],[0,-1]];
+    while(queue.length){const current=queue.shift(),cell=state.cells[current];if(!cell||cell.blocked||cell.roomId)continue;result.push(current);const p=rc(current);steps.forEach(([dr,dc])=>{const r=p.r+dr,c=p.c+dc;if(r<0||c<0||r>=state.rows||c>=state.cols)return;const n=idx(r,c);if(!seen.has(n)){seen.add(n);queue.push(n)}})}
+    result.forEach(i=>state.cells[i].roomId=roomId);return result;
+  }
   function rc(i){return{r:Math.floor(i/state.cols),c:i%state.cols}}
   function idx(r,c){return r*state.cols+c}
   function edgeNeighbor(i,side){const p=rc(i),map={top:[p.r-1,p.c,'bottom'],right:[p.r,p.c+1,'left'],bottom:[p.r+1,p.c,'top'],left:[p.r,p.c-1,'right']},q=map[side];return q&&q[0]>=0&&q[1]>=0&&q[0]<state.rows&&q[1]<state.cols?{index:idx(q[0],q[1]),opposite:q[2]}:null}
@@ -408,11 +441,12 @@
     const diff=(r,c)=>r<0||c<0||r>=state.rows||c>=state.cols||state.cells[idx(r,c)].roomId!==room;
     return{top:diff(p.r-1,p.c),right:diff(p.r,p.c+1),bottom:diff(p.r+1,p.c),left:diff(p.r,p.c-1)};
   }
-  function fitCellSize(){const w=Math.max(320,Math.min(window.innerWidth,760))-22;const ideal=Math.floor(w/state.cols);const size=clamp(ideal,48,96);document.documentElement.style.setProperty('--cell-size',size+'px')}
+  function fitCellSize(){const available=Math.max(260,(el.boardWrap?.clientWidth||Math.min(window.innerWidth,760))-22),ideal=Math.floor(available/state.cols),base=clamp(ideal,22,96),size=clamp(Math.round(base*state.zoom),20,176);document.documentElement.style.setProperty('--cell-size',size+'px');if(el.zoomFit)el.zoomFit.textContent=`Dopasuj · ${Math.round(state.zoom*100)}%`}
+  function setZoom(value){state.zoom=clamp(Math.round(value*100)/100,.65,1.8);fitCellSize();renderBoard();saveSoon()}
 
-  function renderAll(){fitCellSize();renderMode();renderFilters();renderStrip();renderBoard();renderMurderer()}
+  function renderAll(){fitCellSize();renderMode();renderFilters();renderStrip();renderBoard();renderStatus();renderMurderer()}
   function renderMode(){
-    const build=state.mode==='build';el.buildMode.classList.toggle('active',build);el.playMode.classList.toggle('active',!build);el.buildTools.hidden=!build;el.playTools.hidden=build;el.playHistory.hidden=build;el.playUndo.disabled=!history.length;el.playRedo.disabled=!future.length;el.title.value=state.title;
+    const build=state.mode==='build';el.buildMode.classList.toggle('active',build);el.playMode.classList.toggle('active',!build);el.buildTools.hidden=!build;el.playTools.hidden=build;el.playHistory.hidden=build;el.playUndo.disabled=!history.length;el.playRedo.disabled=!future.length;el.zoomOut.disabled=state.zoom<=.65;el.zoomIn.disabled=state.zoom>=1.8;el.title.value=state.title;
     $$('#buildTools .tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.buildTool));$$('#playTools .tool[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.playTool));
   }
   function renderFilters(){
@@ -429,16 +463,16 @@
       else if(state.buildTool==='block')el.activeStrip.innerHTML=clear+`<button class="object-chip ${state.clearMode?'':'active'}"><span style="font-size:20px">▧</span>Dotknij, aby przełączyć blokadę</button>`;
       else el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="cell">✏️ Edytuj wybrane pole</button><button class="object-chip" data-action="setup">⚙️ Plansza</button>`;
     }else if(state.playTool==='x'){
-      el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#dc2447">✕</span>Wykluczasz całe pola</button>`;
+      el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#dc2447">✕</span>Dotknij albo przytrzymaj i przeciągnij</button>`;
     }else if(state.playTool==='inspect'){
-      el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#475569">☝️</span>Dotknij pola, aby je podejrzeć</button>`;
+      el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#475569">☝️</span>Dotknij pole · przytrzymaj dla szybkich akcji</button>`;
     }else{
-      const people=peopleForStrip();if(state.playTool==='candidate'&&!people.some(p=>p.id===state.activePersonId))state.activePersonId=people[0]?.id||null;
-      el.activeStrip.innerHTML=`<button class="person-chip" data-action="people">＋ osoby</button>`+people.map(p=>`<button class="person-chip ${p.id===state.activePersonId?'active':''}" data-person="${p.id}"><span class="person-dot" style="background:${esc(p.color)}">${esc(p.code)}</span>${esc(p.name)}</button>`).join('');
+      const people=peopleForStrip();if(state.playTool==='candidate'&&!people.some(p=>p.id===state.activePersonId)){state.activePersonId=people[0]?.id||null;if(state.focusPersonId)state.focusPersonId=state.activePersonId}
+      el.activeStrip.innerHTML=`<button class="person-chip" data-action="people">＋ osoby</button>`+people.map(p=>{const count=personCount(p.id),focused=state.focusPersonId===p.id;return`<button class="person-chip ${p.id===state.activePersonId?'active':''} ${focused?'focused':''}" data-person="${p.id}" title="${esc(count.title)} · dotknij dwa razy, aby przełączyć skupienie"><span class="person-dot" style="background:${esc(p.color)}">${esc(p.code)}</span><span>${esc(p.name)}</span>${focused?'<span class="focus-eye">👁</span>':''}<span class="person-count ${count.zero?'zero':''}">${count.text}</span></button>`}).join('');
     }
   }
   function renderBoard(){
-    el.board.style.setProperty('--cols',state.cols);const markCols=Math.max(2,Math.min(4,Math.ceil(Math.sqrt(Math.max(1,state.people.length))))),bad=conflicts(),roomLabels=roomLabelsData(),focusPerson=state.mode==='play'&&['candidate','final'].includes(state.playTool)?state.activePersonId:null;let html='';
+    el.board.style.setProperty('--cols',state.cols);const markCols=Math.max(2,Math.min(4,Math.ceil(Math.sqrt(Math.max(1,state.people.length))))),bad=conflicts(),roomLabels=roomLabelsData(),activePerson=state.mode==='play'&&['candidate','final'].includes(state.playTool)?state.activePersonId:null,focusPerson=state.mode==='play'&&['candidate','final'].includes(state.playTool)?state.focusPersonId:null;el.board.classList.toggle('focus-mode',!!focusPerson);let html='';
     state.cells.forEach((cell,i)=>{
       const room=getRoom(cell.roomId),b=roomBorders(i),style=[`border-top:${b.top?'4px':'1px'} solid ${b.top?'#1f2937':'#8e9bad'}`,`border-right:${b.right?'4px':'1px'} solid ${b.right?'#1f2937':'#8e9bad'}`,`border-bottom:${b.bottom?'4px':'1px'} solid ${b.bottom?'#1f2937':'#8e9bad'}`,`border-left:${b.left?'4px':'1px'} solid ${b.left?'#1f2937':'#8e9bad'}`];if(room)style.push(`background-color:${esc(room.color)}`);
       const autoCell=cellAutoReason(i),blockedByObject=objectBlocks(cell);let inner='';
@@ -448,19 +482,19 @@
           if(objectList.length){const objs=objectList.map(o=>`<span class="object-badge" title="${esc(o.name)}">${objectIcon(o)}</span>`).join('');inner+=`<div class="objects ${countClass}">${objs}</div>`}
         }
         if(state.mode==='play'){
-          if(cell.final){if(state.display.finals){const p=getPerson(cell.final);if(p)inner+=`<div class="final-token ${focusPerson===p.id?'person-match':''}" style="background:${esc(p.color)}">${esc(p.code)}</div>`}}
+          if(cell.final){if(state.display.finals){const p=getPerson(cell.final);if(p)inner+=`<div class="final-token ${activePerson===p.id?'person-match':''}" style="background:${esc(p.color)}">${esc(p.code)}</div>`}}
           else if((cell.excluded||autoCell)&&state.display.excluded)inner+=`<div class="cell-x ${autoCell&&!cell.excluded?'auto':''}" title="${esc(cell.excluded?'Pole wykluczone':autoCell)}">×</div>`;
           else if(!blockedByObject&&state.display.candidates){
             const candidates=state.people.filter(p=>cell.marks[p.id]==='candidate');
             if(candidates.length){
-              inner+=`<div class="marks" style="--mark-cols:${markCols}">` + candidates.map(p=>`<div class="mark candidate ${focusPerson===p.id?'person-match':''}" style="color:${esc(p.color)}">${esc(p.code)}</div>`).join('') + `</div>`;
+              inner+=`<div class="marks" style="--mark-cols:${markCols}">` + candidates.map(p=>`<div class="mark candidate ${activePerson===p.id?'person-match':''}" style="color:${esc(p.color)}">${esc(p.code)}</div>`).join('') + `</div>`;
             }
           }
         }
       }
       if(cell.note)inner+='<span class="note-dot"></span>';
-      const personFocused=!!focusPerson&&((state.display.finals&&cell.final===focusPerson)||(state.display.candidates&&cell.marks[focusPerson]==='candidate'));
-      html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''} ${personFocused?'person-focus':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
+      const personFocused=!!activePerson&&((state.display.finals&&cell.final===activePerson)||(state.display.candidates&&cell.marks[activePerson]==='candidate'));
+      html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''} ${personFocused?'person-focus':''} ${gesture?.painting&&gesture.visited?.has(i)?'paint-visited':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     const windows=windowEdgesData();if(windows.length){html+=windows.map(edge=>`<span class="board-window ${edge.orientation}" aria-hidden="true" style="left:calc(${edge.x} * var(--cell-size));top:calc(${edge.y} * var(--cell-size))"></span>`).join('')}
     if(roomLabels.length){
@@ -468,6 +502,11 @@
     }
     el.board.innerHTML=html;
   }
+  function renderStatus(){
+    const warnings=state.mode==='play'?candidateWarnings():[];if(!warnings.length){el.statusInfo.hidden=true;el.statusInfo.innerHTML='';return}
+    const shown=warnings.slice(0,2).map(({person})=>`<strong>${esc(person.code)}</strong>: wszystkie zaznaczone możliwości są obecnie zablokowane`).join(' · '),more=warnings.length>2?` · +${warnings.length-2} kolejne`:'';el.statusInfo.hidden=false;el.statusInfo.innerHTML=`ℹ️ ${shown}${more}`;
+  }
+
   function renderMurderer(){
     if(!state.display.finals){el.murdererBox.hidden=true;return}
     const victim=state.people.find(p=>p.victim);if(!victim){el.murdererBox.hidden=true;return}const vi=state.cells.findIndex(c=>c.final===victim.id);if(vi<0){el.murdererBox.hidden=true;return}const roomId=state.cells[vi].roomId;if(!roomId){el.murdererBox.hidden=false;el.murdererBox.innerHTML='Ofiara jest ustawiona, ale pole nie ma przypisanego pokoju.';return}const suspects=state.cells.map((c,i)=>c.final&&!getPerson(c.final)?.victim&&c.roomId===roomId?getPerson(c.final):null).filter(Boolean);el.murdererBox.hidden=false;if(suspects.length===1)el.murdererBox.innerHTML=`🔎 Morderca: <strong>${esc(suspects[0].name)}</strong> — przebywa w tym samym pokoju co ofiara.`;else if(suspects.length===0)el.murdererBox.innerHTML='Ofiara jest sama w pokoju — na razie nie można wskazać mordercy.';else el.murdererBox.innerHTML=`W pokoju ofiary są ${suspects.length} osoby. Sprawdź finalne pozycje lub granice pokoju.`;
@@ -500,9 +539,65 @@
     }
   }
 
+  function clearGameMarksAt(i){const cell=state.cells[i];cell.final=null;cell.marks={};cell.excluded=false}
+  function quickReasonForCell(i){const cell=state.cells[i];if(cell.blocked)return'Pole jest niedostępne';if(objectBlocks(cell))return'Pole jest zablokowane przez niedozwolony przedmiot';if(cell.excluded)return'Pole zostało ręcznie wykluczone';return cellAutoReason(i)}
+  function openCellQuickSheet(i){
+    state.selected=i;renderBoard();const cell=state.cells[i],pos=rc(i),person=getPerson(state.activePersonId),reason=quickReasonForCell(i),actions=[];
+    if(state.mode==='build'){
+      if(state.buildTool==='room'&&state.activeRoomId){const room=getRoom(state.activeRoomId);actions.push(`<button class="quick-action" id="quickRoomToggle"><strong>🚪 ${cell.roomId===state.activeRoomId?'Usuń wybrany pokój z pola':`Przypisz: ${esc(room?.name||'wybrany pokój')}`}</strong><small>Zmienia tylko przytrzymane pole.</small></button>`);if(!cell.roomId&&!cell.blocked)actions.push(`<button class="quick-action" id="quickFillRoom"><strong>▦ Wypełnij tę białą strefę</strong><small>Wszystkie stykające się białe pola zostaną przypisane do pokoju „${esc(room?.name||'wybranego')}”. Oddzielne białe strefy pozostaną bez zmian.</small></button>`)}
+      if(state.buildTool==='object'&&state.activeObjectId){const obj=getObj(state.activeObjectId);actions.push(`<button class="quick-action" id="quickObject"><strong>${objectIcon(obj)} Przełącz: ${esc(obj?.name||'przedmiot')}</strong><small>Dodaje lub usuwa wybrany przedmiot z pola.</small></button>`)}
+      if(state.buildTool==='window')actions.push('<button class="quick-action" id="quickWindow"><strong>🪟 Ustaw okno</strong><small>Wybierz krawędź przytrzymanego pola.</small></button>');
+      if(state.buildTool==='block')actions.push(`<button class="quick-action" id="quickBlock"><strong>▧ ${cell.blocked?'Odblokuj':'Zablokuj'} pole</strong></button>`);
+      actions.push('<button class="quick-action" id="quickInspect"><strong>☝️ Edytuj i podejrzyj pole</strong></button>');
+      actions.push('<button class="quick-action" id="quickClearGame"><strong>🧹 Wyczyść oznaczenia gry</strong><small>Nie usuwa pokoju, obiektów ani okien.</small></button>');
+    }else{
+      if(person)actions.push(`<button class="quick-action" id="quickCandidate"><strong>✎ Przełącz „możliwe”: ${esc(person.code)}</strong></button><button class="quick-action" id="quickFinal"><strong>● Ustaw lub usuń finalnie: ${esc(person.code)}</strong></button>`);
+      actions.push('<button class="quick-action" id="quickExclude"><strong>✕ Przełącz wykluczenie pola</strong></button>');
+      actions.push('<button class="quick-action" id="quickClearGame"><strong>🧹 Wyczyść oznaczenia tego pola</strong><small>Usuwa możliwe osoby, finalne ustawienie i ręczne X.</small></button>');
+      actions.push('<button class="quick-action" id="quickInspect"><strong>☝️ Podejrzyj szczegóły pola</strong></button>');
+    }
+    openSheet(`Szybkie akcje — ${pos.r+1}×${pos.c+1}`,`${reason?`<div class="quick-reason">ℹ️ ${esc(reason)}</div>`:''}<div class="quick-actions">${actions.join('')}</div>`);
+    const done=(message)=>{closeSheet();if(message)toast(message)};
+    const roomToggle=$('#quickRoomToggle');if(roomToggle)roomToggle.onclick=()=>{change(()=>cell.roomId=cell.roomId===state.activeRoomId?null:state.activeRoomId);done()};
+    const fill=$('#quickFillRoom');if(fill)fill.onclick=()=>{let count=0;change(()=>{count=fillRoomZone(i,state.activeRoomId).length});done(count?`Wypełniono ${count} ${fieldWord(count)} w tej strefie.`:'Ta strefa nie zawiera białych pól.')};
+    const objectBtn=$('#quickObject');if(objectBtn)objectBtn.onclick=()=>{change(()=>{const k=cell.objects.indexOf(state.activeObjectId);if(k>=0)cell.objects.splice(k,1);else cell.objects.push(state.activeObjectId)});done()};
+    const windowBtn=$('#quickWindow');if(windowBtn)windowBtn.onclick=()=>openWindowSheet(i);
+    const blockBtn=$('#quickBlock');if(blockBtn)blockBtn.onclick=()=>{change(()=>{cell.blocked=!cell.blocked;if(cell.blocked)clearGameMarksAt(i)});done()};
+    const candidateBtn=$('#quickCandidate');if(candidateBtn)candidateBtn.onclick=()=>{if(!person){done('Najpierw wybierz osobę.');return}const problem=constraintReason(i,person.id);if(problem){done(problem);return}if(cell.final){done('Najpierw usuń finalne ustawienie.');return}change(()=>{if(cell.marks[person.id]==='candidate')delete cell.marks[person.id];else cell.marks[person.id]='candidate'});done()};
+    const finalBtn=$('#quickFinal');if(finalBtn)finalBtn.onclick=()=>{if(!person){done('Najpierw wybierz osobę.');return}if(cell.final===person.id){change(()=>cell.final=null);done();return}const problem=constraintReason(i,person.id);if(problem){done(problem);return}change(()=>{state.cells.forEach(c=>delete c.marks[person.id]);cell.final=person.id;cell.excluded=false;cell.marks={}});done()};
+    const excludeBtn=$('#quickExclude');if(excludeBtn)excludeBtn.onclick=()=>{if(cell.final){done('Najpierw usuń finalne ustawienie.');return}if(objectBlocks(cell)){done('To pole jest niedozwolone przez przedmiot — ręczne X nie jest potrzebne.');return}if(cellAutoReason(i)){done(`Automatyczne X: ${cellAutoReason(i)}`);return}change(()=>{cell.excluded=!cell.excluded;if(cell.excluded)cell.marks={}});done()};
+    const clearBtn=$('#quickClearGame');if(clearBtn)clearBtn.onclick=()=>{change(()=>clearGameMarksAt(i));done('Oznaczenia pola wyczyszczone.')};
+    const inspectBtn=$('#quickInspect');if(inspectBtn)inspectBtn.onclick=()=>openCellSheet(i);
+  }
+  function cancelGesture(){if(!gesture)return;clearTimeout(gesture.readyTimer);clearTimeout(gesture.longTimer);gesture=null}
+  function gestureCellAt(x,y){const node=document.elementFromPoint(x,y)?.closest?.('.cell');return node&&el.board.contains(node)?Number(node.dataset.index):null}
+  function paintAt(i){
+    if(!gesture?.painting||i==null||gesture.visited.has(i))return;gesture.visited.add(i);const cell=state.cells[i];if(!cell||cell.blocked)return;let mutate=null;
+    if(gesture.tool==='candidate'){
+      const pid=gesture.personId;if(!pid)return;if(gesture.target){if(!cell.final&&!constraintReason(i,pid)&&cell.marks[pid]!=='candidate')mutate=()=>cell.marks[pid]='candidate'}else if(cell.marks[pid]==='candidate')mutate=()=>delete cell.marks[pid]
+    }else if(gesture.tool==='x'){
+      if(gesture.target){if(!cell.final&&!objectBlocks(cell)&&!cellAutoReason(i)&&!cell.excluded)mutate=()=>{cell.excluded=true;cell.marks={}}}else if(cell.excluded)mutate=()=>cell.excluded=false
+    }
+    if(mutate){if(!gesture.changed){snapshot();gesture.changed=true}mutate();gesture.count++;renderBoard()}
+  }
+  function beginCellGesture(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;const cell=e.target.closest('.cell');if(!cell||pinch)return;cancelGesture();const index=Number(cell.dataset.index),g={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,startIndex:index,ready:false,moved:false,painting:false,visited:new Set(),changed:false,count:0,tool:state.mode==='play'?state.playTool:null,personId:state.activePersonId,target:null};gesture=g;
+    g.readyTimer=setTimeout(()=>{if(gesture===g)g.ready=true},220);
+    g.longTimer=setTimeout(()=>{if(gesture!==g||g.painting||g.moved)return;gesture=null;navigator.vibrate?.(10);openCellQuickSheet(index);g.suppress=true;window.__murdokuSuppressClickUntil=Date.now()+650},520);
+  }
+  function moveCellGesture(e){
+    const g=gesture;if(!g||g.pointerId!==e.pointerId)return;const distance=Math.hypot(e.clientX-g.startX,e.clientY-g.startY);
+    if(!g.ready){if(distance>10){g.moved=true;cancelGesture()}return}
+    if(!g.painting){if(distance<6)return;if(state.mode!=='play'||!['candidate','x'].includes(g.tool)){g.moved=true;cancelGesture();return}if(g.tool==='candidate'&&!g.personId){cancelGesture();toast('Najpierw wybierz osobę.');return}g.painting=true;clearTimeout(g.longTimer);g.target=g.tool==='candidate'?state.cells[g.startIndex].marks[g.personId]!=='candidate':!state.cells[g.startIndex].excluded;try{el.board.setPointerCapture(e.pointerId)}catch(_){ }paintAt(g.startIndex)}
+    if(g.painting){e.preventDefault();paintAt(gestureCellAt(e.clientX,e.clientY))}
+  }
+  function endCellGesture(e){
+    const g=gesture;if(!g||g.pointerId!==e.pointerId)return;clearTimeout(g.readyTimer);clearTimeout(g.longTimer);if(g.painting){window.__murdokuSuppressClickUntil=Date.now()+500;gesture=null;normalize();renderAll();if(g.changed){saveSoon();toast(g.target?`Zaznaczono ${g.count} ${fieldWord(g.count)}.`:`Usunięto oznaczenia z ${g.count} pól.`)}}else gesture=null;
+  }
+
   function openCellSheet(i){
-    const cell=state.cells[i],room=getRoom(cell.roomId),pos=rc(i);openSheet(`Pole ${pos.r+1}×${pos.c+1}`,`
-      <div class="section"><div class="field"><label>Pokój</label><select id="cellRoom"><option value="">Bez pokoju</option>${state.rooms.map(r=>`<option value="${r.id}" ${r.id===cell.roomId?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
+    const cell=state.cells[i],room=getRoom(cell.roomId),pos=rc(i),autoReason=cellAutoReason(i);openSheet(`Pole ${pos.r+1}×${pos.c+1}`,`
+      ${autoReason?`<div class="quick-reason">ℹ️ Automatyczne wykluczenie: ${esc(autoReason)}</div>`:''}<div class="section"><div class="field"><label>Pokój</label><select id="cellRoom"><option value="">Bez pokoju</option>${state.rooms.map(r=>`<option value="${r.id}" ${r.id===cell.roomId?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
       <div class="field"><label>Notatka</label><textarea id="cellNote" placeholder="Np. ważna wskazówka">${esc(cell.note)}</textarea></div>
       <label class="toggle"><input id="cellBlocked" type="checkbox" ${cell.blocked?'checked':''}><span>Pole niedostępne</span></label></div>
       <div class="section"><h3>Przedmioty na polu</h3><div class="palette">${state.objects.filter(o=>!o.edge).map(o=>`<button data-cell-object="${o.id}" class="${cell.objects.includes(o.id)?'active':''}" title="${esc(o.name)}">${objectIcon(o)}</button>`).join('')}</div></div>
@@ -559,7 +654,7 @@
   }
   function objectForm(id){const o=id?getObj(id):{name:'',symbol:'◆',occupiable:true};openSheet(id?'Edytuj przedmiot':'Nowy przedmiot',`<div class="field"><label>Nazwa</label><input id="objName" value="${esc(o.name)}"></div><div class="field"><label>Emoji lub krótki symbol</label><input id="objSymbol" value="${esc(o.symbol)}" maxlength="4"></div><label class="toggle"><input id="objOcc" type="checkbox" ${o.occupiable?'checked':''}><span>Osoba może zajmować pole z tym przedmiotem</span></label><button class="btn primary full" id="saveObject">Zapisz</button>`);$('#saveObject').onclick=()=>{const name=$('#objName').value.trim(),symbol=$('#objSymbol').value.trim();if(!name||!symbol){toast('Podaj nazwę i symbol.');return}change(()=>{if(id)Object.assign(getObj(id),{name,symbol,occupiable:$('#objOcc').checked});else{const n={id:uid('obj'),name,symbol,occupiable:$('#objOcc').checked,edge:false,builtin:false};state.objects.push(n);state.activeObjectId=n.id}});objectsSheet()}}
   function rulesSheet(){openSheet('Reguły i wskazówki',`<div class="section"><label class="toggle"><input id="autoX" type="checkbox" ${state.rules.autoX?'checked':''}><span>Pokazuj automatyczne X</span></label><label class="toggle"><input id="rowsCols" type="checkbox" ${state.rules.uniqueRowsCols?'checked':''}><span>Każda osoba w innym wierszu i kolumnie</span></label><label class="toggle"><input id="uniquePeople" type="checkbox" ${state.rules.uniquePeople?'checked':''}><span>Każda osoba tylko raz na planszy</span></label><label class="toggle"><input id="equip" type="checkbox" ${state.rules.forbidEquipment?'checked':''}><span>Blokuj stół, TV, roślinę, regał i pudło</span></label></div><div class="field"><label>Opis wskazówek z książki</label><textarea id="clues" placeholder="Przepisz wskazówki…">${esc(state.clues)}</textarea></div><button class="btn primary full" id="saveRules">Zapisz</button>`);$('#saveRules').onclick=()=>{change(()=>{state.rules.autoX=$('#autoX').checked;state.rules.uniqueRowsCols=$('#rowsCols').checked;state.rules.uniquePeople=$('#uniquePeople').checked;state.rules.forbidEquipment=$('#equip').checked;state.clues=$('#clues').value});closeSheet()}}
-  function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Wybierz narzędzie na dole. Nad narzędziami pojawią się pokoje, przedmioty albo osoby.</li><li>Opcja <strong>Czyść</strong> resetuje każde dotknięte pole wraz z pokojem, przedmiotami, oknami i oznaczeniami.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia jedno duże X na całym polu, a „Finalnie” ustawia osobę.</li><li>Po finalnym ustawieniu pola w tym samym wierszu i kolumnie dostają automatyczne X. Niedozwolone wyposażenie pozostaje widoczne bez X, ale nie można na nim ustawić osoby.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li><li>„Obok” oznacza bezpośrednio górę, dół, lewo lub prawo oraz ten sam pokój.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
+  function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Przytrzymaj pole, aby otworzyć szybkie akcje. Przy narzędziu „Pokój” możesz w ten sposób wypełnić całą stykającą się białą strefę wybranym pokojem.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia X, a „Finalnie” ustawia osobę.</li><li>W trybie „Możliwe” lub „Wyklucz” przytrzymaj pole chwilę i przeciągnij palec, aby pomalować kilka pól jednym ruchem.</li><li>Dotknij osobę dwa razy, aby włączyć tryb skupienia. Licznik przy osobie pokazuje liczbę nadal dostępnych zaznaczonych pól.</li><li>Automatyczne X możesz przytrzymać lub podejrzeć, aby zobaczyć jego powód.</li><li>Powiększaj planszę przyciskami −/＋ albo gestem szczypania. „Dopasuj” wraca do widoku całej planszy.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
 
   function placeVictimLast(){
     const victim=state.people.find(p=>p.victim);if(!victim){toast('Brak ofiary.');return}const usedR=new Set(),usedC=new Set();state.cells.forEach((c,i)=>{if(c.final){const p=rc(i);usedR.add(p.r);usedC.add(p.c)}});const freeR=[];for(let r=0;r<state.rows;r++)if(!usedR.has(r))freeR.push(r);const freeC=[];for(let c=0;c<state.cols;c++)if(!usedC.has(c))freeC.push(c);if(freeR.length!==1||freeC.length!==1){toast('Musi pozostać dokładnie jeden wolny wiersz i jedna kolumna.');return}const i=idx(freeR[0],freeC[0]),reason=constraintReason(i,victim.id);if(reason&&state.cells[i].final!==victim.id){toast(reason);return}change(()=>state.cells[i].final=victim.id);closeSheet();toast('Ofiara ustawiona na ostatnim wolnym polu.')
@@ -569,18 +664,26 @@
     const url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Zapisano plik JSON.')
   }
 
-  el.board.addEventListener('click',e=>{const b=e.target.closest('.cell');if(b)cellTap(Number(b.dataset.index))});
-  el.buildMode.onclick=()=>{state.mode='build';renderAll();saveSoon()};el.playMode.onclick=()=>{state.mode='play';state.clearMode=false;renderAll();saveSoon()};
-  el.buildTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.buildTool=b.dataset.tool;state.clearMode=false;renderAll();saveSoon()});
-  el.playTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.playTool=b.dataset.tool;if(state.playTool==='candidate'){const visible=peopleForStrip();if(!visible.some(p=>p.id===state.activePersonId))state.activePersonId=visible[0]?.id||null}renderAll();saveSoon()});
+  el.board.addEventListener('click',e=>{if(Date.now()<(window.__murdokuSuppressClickUntil||0))return;const b=e.target.closest('.cell');if(b)cellTap(Number(b.dataset.index))});
+  el.board.addEventListener('pointerdown',beginCellGesture);
+  document.addEventListener('pointermove',moveCellGesture,{passive:false});
+  document.addEventListener('pointerup',endCellGesture);
+  document.addEventListener('pointercancel',endCellGesture);
+  el.boardWrap.addEventListener('touchstart',e=>{if(e.touches.length!==2)return;cancelGesture();const a=e.touches[0],b=e.touches[1];pinch={distance:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),zoom:state.zoom};e.preventDefault()},{passive:false});
+  el.boardWrap.addEventListener('touchmove',e=>{if(!pinch||e.touches.length!==2)return;const a=e.touches[0],b=e.touches[1],distance=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);state.zoom=clamp(pinch.zoom*(distance/Math.max(1,pinch.distance)),.65,1.8);e.preventDefault();if(!pinchFrame)pinchFrame=requestAnimationFrame(()=>{pinchFrame=0;fitCellSize();renderBoard()})},{passive:false});
+  el.boardWrap.addEventListener('touchend',e=>{if(!pinch||e.touches.length>=2)return;pinch=null;if(pinchFrame){cancelAnimationFrame(pinchFrame);pinchFrame=0}state.zoom=Math.round(state.zoom*100)/100;renderAll();saveSoon()},{passive:false});
+  el.zoomOut.onclick=()=>setZoom(state.zoom-.15);el.zoomIn.onclick=()=>setZoom(state.zoom+.15);el.zoomFit.onclick=()=>setZoom(1);
+  el.buildMode.onclick=()=>{cancelGesture();state.mode='build';renderAll();saveSoon()};el.playMode.onclick=()=>{cancelGesture();state.mode='play';state.clearMode=false;renderAll();saveSoon()};
+  el.buildTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;cancelGesture();state.buildTool=b.dataset.tool;state.clearMode=false;renderAll();saveSoon()});
+  el.playTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;cancelGesture();state.playTool=b.dataset.tool;if(state.playTool==='candidate'){const visible=peopleForStrip();if(!visible.some(p=>p.id===state.activePersonId)){state.activePersonId=visible[0]?.id||null;if(state.focusPersonId)state.focusPersonId=state.activePersonId}}renderAll();saveSoon()});
   el.playUndo.onclick=undo;el.playRedo.onclick=redo;
   el.filterBar.addEventListener('click',e=>{const action=e.target.closest('[data-filter-action]');if(action){if(action.dataset.filterAction==='objects')objectFilterSheet();return}const b=e.target.closest('[data-display]');if(!b)return;const key=b.dataset.display;state.display[key]=!state.display[key];renderAll();saveSoon()});
-  el.activeStrip.addEventListener('click',e=>{const r=e.target.closest('[data-room]'),o=e.target.closest('[data-object]'),p=e.target.closest('[data-person]'),a=e.target.closest('[data-action]');if(r){state.activeRoomId=r.dataset.room;state.clearMode=false;renderStrip();saveSoon()}else if(o){state.activeObjectId=o.dataset.object;state.clearMode=false;renderStrip();saveSoon()}else if(p){state.activePersonId=p.dataset.person;renderAll();saveSoon()}else if(a){if(a.dataset.action==='clear-mode'){state.clearMode=!state.clearMode;renderAll();saveSoon();toast(state.clearMode?'Tryb czyszczenia: dotknij pola.':'Tryb czyszczenia wyłączony.');return}({rooms:roomsSheet,objects:objectsSheet,people:peopleSheet,setup:setupSheet,cell:()=>state.selected==null?toast('Najpierw wybierz pole.'):openCellSheet(state.selected)})[a.dataset.action]?.()}});
+  el.activeStrip.addEventListener('click',e=>{const r=e.target.closest('[data-room]'),o=e.target.closest('[data-object]'),p=e.target.closest('[data-person]'),a=e.target.closest('[data-action]');if(r){state.activeRoomId=r.dataset.room;state.clearMode=false;renderStrip();saveSoon()}else if(o){state.activeObjectId=o.dataset.object;state.clearMode=false;renderStrip();saveSoon()}else if(p){const id=p.dataset.person,now=Date.now(),doubleTap=personTap.id===id&&now-personTap.time<430;state.activePersonId=id;if(doubleTap){state.focusPersonId=state.focusPersonId===id?null:id;personTap={id:null,time:0};toast(state.focusPersonId?`Tryb skupienia: ${getPerson(id)?.name||id}.`:'Tryb skupienia wyłączony.')}else{if(state.focusPersonId)state.focusPersonId=id;personTap={id,time:now}}renderAll();saveSoon()}else if(a){if(a.dataset.action==='clear-mode'){state.clearMode=!state.clearMode;renderAll();saveSoon();toast(state.clearMode?'Tryb czyszczenia: dotknij pola.':'Tryb czyszczenia wyłączony.');return}({rooms:roomsSheet,objects:objectsSheet,people:peopleSheet,setup:setupSheet,cell:()=>state.selected==null?toast('Najpierw wybierz pole.'):openCellSheet(state.selected)})[a.dataset.action]?.()}});
   el.menu.onclick=menuSheet;el.closeSheet.onclick=closeSheet;el.backdrop.onclick=closeSheet;
   el.title.addEventListener('input',e=>{state.title=e.target.value;saveSoon()});
   el.importInput.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);snapshot();state=x;normalize();renderAll();saveSoon();closeSheet();toast('Projekt zaimportowany.')}catch(err){toast('Niepoprawny plik projektu.')}};reader.readAsText(f);e.target.value=''});
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
-  window.addEventListener('resize',()=>{fitCellSize()});
+  window.addEventListener('resize',()=>renderAll());
 
   renderAll();saveSoon();requestAnimationFrame(()=>$('#bootBlocker').remove());
 })();
