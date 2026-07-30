@@ -19,7 +19,10 @@ jobs:
           fetch-depth: 0
       - name: Apply and verify controls patch
         run: |
-          base64 -d .patches/murdoku-v10-controls.patch.gz.b64 | gzip -d > /tmp/murdoku-v10-controls.patch
+          echo "8f4b321adbda637fd8f38cd5d9c7d670cb16143f6f4cbb128d6a6313409c1d6b  .patches/v10/part-00" | sha256sum -c -
+          echo "7329d5cbbb6c3be18791534edce2b1b59bfe0d5664584c8ac3c34a9e0bc66d76  .patches/v10/part-01" | sha256sum -c -
+          echo "5f9f6a612c336117da5de63295930367a226f56ef016f428e754206fb49a895f  .patches/v10/part-02" | sha256sum -c -
+          cat .patches/v10/part-* | base64 -d | gzip -d > /tmp/murdoku-v10-controls.patch
           git apply --check /tmp/murdoku-v10-controls.patch
           git apply /tmp/murdoku-v10-controls.patch
           test "$(git hash-object index.html)" = "abb77b2a2fcb9f83a64a65a9a732002e26f222a6"
