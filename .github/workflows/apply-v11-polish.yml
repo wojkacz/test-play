@@ -1,0 +1,51 @@
+name: Apply Murdoku v11 polish
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  apply:
+    if: github.event.pull_request.title == 'Apply Murdoku v11 polish'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply and verify v11 patch
+        run: |
+          echo "97e56ec144495b49779820910259dd652481fd61b31374f0e9a08be44b19e12c  .patches/v11/part-00" | sha256sum -c -
+          echo "92eb687af98b4ba356e3cfefc1bdfd4894b4ca3960a6c93929e34942cad09572  .patches/v11/part-01" | sha256sum -c -
+          cat .patches/v11/part-* | base64 -d | gzip -d > /tmp/murdoku-v11.patch
+          git apply --check /tmp/murdoku-v11.patch
+          git apply /tmp/murdoku-v11.patch
+          test "$(git hash-object index.html)" = "4dd6dbc03f7a8f9e3308e437459117eb2eea7b7a"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          script = re.search(r'<script>\s*(.*?)\s*</script>', html, re.S)
+          if not script:
+              raise SystemExit('Missing script block')
+          if 'navigator.share' in html:
+              raise SystemExit('Share API still present in export')
+          for label in ['Salon','Łazienka','Kuchnia','Jadalnia','Sypialnia']:
+              if label not in html:
+                  raise SystemExit(f'Missing room preset: {label}')
+          Path('/tmp/murdoku-v11.js').write_text(script.group(1), encoding='utf-8')
+          PY
+          node --check /tmp/murdoku-v11.js
+      - name: Remove temporary patch tooling
+        run: rm -rf .patches .github/workflows/apply-v11-polish.yml
+      - name: Commit only index.html changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Polish room labels windows and export"
+          git push origin HEAD:${{ github.head_ref }}
