@@ -43,6 +43,7 @@
     .filter-chip{flex:none;min-height:36px;white-space:nowrap;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:12px;font-weight:850;display:flex;align-items:center;gap:5px}
     .filter-chip span{font-size:14px;color:var(--text)}
     .filter-chip.active{border-color:var(--accent);background:rgba(139,92,246,.2);color:#fff}
+    .filter-chip.filtered{border-color:var(--warning);background:rgba(251,191,36,.14);color:#fff}
     .filter-chip:not(.active){opacity:.58}
 
     .board-wrap{position:relative;flex:1;min-height:0;overflow:auto;padding:10px 10px 18px;display:flex;align-items:flex-start;justify-content:flex-start;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
@@ -74,13 +75,11 @@
     .mark.candidate{background:rgba(255,255,255,.88)}
     .mark.x{color:#dc2447;font-size:calc(var(--cell-size) * .19)}
     .mark.auto{background:rgba(251,113,133,.12);color:#9f1239}
-    .edge-window{position:absolute;z-index:11;pointer-events:none;width:74%;height:12px;left:13%;top:-2px;box-sizing:border-box;background:#e9f5ff;border:2px solid #334155;border-radius:4px;color:transparent;font-size:0;box-shadow:0 0 0 1px rgba(255,255,255,.72);transform-origin:center}
-    .edge-window::before,.edge-window::after{content:"";position:absolute;background:#334155;border-radius:2px}
-    .edge-window::before{width:2px;top:0;bottom:0;left:calc(50% - 1px)}
-    .edge-window::after{height:2px;left:3px;right:3px;bottom:1px;opacity:.42}
-    .edge-window.bottom{top:calc(100% - 10px);transform:rotate(180deg)}
-    .edge-window.left{left:calc(-37% + 4px);top:calc(50% - 6px);transform:rotate(-90deg)}
-    .edge-window.right{left:calc(63% - 4px);top:calc(50% - 6px);transform:rotate(90deg)}
+    .edge-window{position:absolute;z-index:11;pointer-events:none;width:76%;height:14px;left:12%;top:-3px;transform-origin:center}
+    .edge-window svg{display:block;width:100%;height:100%;overflow:visible}
+    .edge-window.bottom{top:calc(100% - 11px);transform:rotate(180deg)}
+    .edge-window.left{left:calc(-38% + 4px);top:calc(50% - 7px);transform:rotate(-90deg)}
+    .edge-window.right{left:calc(62% - 4px);top:calc(50% - 7px);transform:rotate(90deg)}
     .victim-result{margin:0 10px 8px;padding:10px 12px;border-radius:13px;border:1px solid var(--ok);background:rgba(52,211,153,.08);font-size:13px;line-height:1.35}
 
     .bottom{position:sticky;bottom:0;z-index:35;background:rgba(13,18,34,.97);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safeBottom))}
@@ -155,6 +154,7 @@
     <div class="filterbar" id="filterBar" aria-label="Filtry wyświetlania mapy">
       <button class="filter-chip active" data-display="excluded" aria-pressed="true" aria-label="Wyświetlanie wykluczonych"><span>✕</span>Wykluczone</button>
       <button class="filter-chip active" data-display="objects" aria-pressed="true" aria-label="Wyświetlanie obiektów"><span>🛋️</span>Obiekty</button>
+      <button class="filter-chip active" id="objectFilterBtn" data-filter-action="objects" aria-label="Wybierz widoczne obiekty"><span>⚙️</span><b id="objectFilterCount">Wszystkie</b></button>
       <button class="filter-chip active" data-display="candidates" aria-pressed="true" aria-label="Wyświetlanie możliwych"><span>✎</span>Możliwe</button>
       <button class="filter-chip active" data-display="finals" aria-pressed="true" aria-label="Wyświetlanie finalnych"><span>●</span>Finalne</button>
     </div>
@@ -218,6 +218,7 @@
   const PERSON_COLORS=['#ef4444','#3b82f6','#10b981','#f97316','#a855f7','#06b6d4','#eab308','#ec4899','#14b8a6','#6366f1','#84cc16','#f43f5e','#0ea5e9','#8b5cf6'];
   const ROOM_COLORS=['#dbeafe','#dcfce7','#fef3c7','#fce7f3','#ede9fe','#cffafe','#ffedd5','#e0f2fe','#fae8ff','#ecfccb','#fee2e2','#ccfbf1'];
   const ROOM_NAME_PRESETS=['Salon','Łazienka','Kuchnia','Jadalnia','Sypialnia'];
+  const EDGE_WINDOW_SVG='<svg viewBox="0 0 100 16" focusable="false" aria-hidden="true"><rect x="1" y="1" width="98" height="14" rx="3" fill="#e9f5ff" stroke="#334155" stroke-width="2"/><path d="M50 1V15" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"/><path d="M4 12H96" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" opacity=".42"/></svg>';
   const DEFAULT_PEOPLE=[
     {id:'p1',name:'A',code:'A',color:'#ef4444',victim:false},
     {id:'p2',name:'B',code:'B',color:'#3b82f6',victim:false},
@@ -225,7 +226,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:12,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},clues:''});
+  const makeState=()=>({version:13,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null;
@@ -238,15 +239,16 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=12;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
+    const d=makeState();state=Object.assign(d,state||{});state.version=13;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
+    const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
     const rawPeople=Array.isArray(state.people)?state.people:d.people,victim=rawPeople.find(p=>p&&p.victim)||clone(DEFAULT_PEOPLE[3]),suspects=rawPeople.filter(p=>p&&!p.victim).slice(0,PERSON_CODES.length);
     suspects.forEach((p,i)=>{const previousCode=String(p.code||'').toUpperCase(),previousName=String(p.name||'').trim(),code=PERSON_CODES[i];p.id=p.id||uid('person');p.victim=false;p.code=code;if(!previousName||/^Podejrzany\s+[A-N]$/i.test(previousName)||previousName===previousCode)p.name=code;p.color=/^#[0-9a-f]{6}$/i.test(p.color||'')?p.color:PERSON_COLORS[i%PERSON_COLORS.length]});
     victim.id=victim.id||'victim';victim.victim=true;victim.code='O';victim.name=String(victim.name||'').trim()||'Ofiara';victim.color=/^#[0-9a-f]{6}$/i.test(victim.color||'')?victim.color:'#64748b';
     state.people=[...suspects,victim];
-    const personIds=new Set(state.people.map(p=>p.id)),need=state.rows*state.cols;state.cells=Array.isArray(state.cells)?state.cells.slice(0,need):[];while(state.cells.length<need)state.cells.push(makeCell());
-    state.cells=state.cells.map(c=>{const source=c||{},marks={};Object.entries(source.marks||{}).forEach(([id,value])=>{if(value==='candidate'&&personIds.has(id))marks[id]='candidate'});return Object.assign(makeCell(),source,{objects:Array.isArray(source.objects)?source.objects:[],windows:Array.isArray(source.windows)?source.windows:[],marks,final:personIds.has(source.final)?source.final:null,excluded:!!source.excluded})});
+    const personIds=new Set(state.people.map(p=>p.id)),cellObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id)),need=state.rows*state.cols;state.cells=Array.isArray(state.cells)?state.cells.slice(0,need):[];while(state.cells.length<need)state.cells.push(makeCell());
+    state.cells=state.cells.map(c=>{const source=c||{},marks={};Object.entries(source.marks||{}).forEach(([id,value])=>{if(value==='candidate'&&personIds.has(id))marks[id]='candidate'});return Object.assign(makeCell(),source,{objects:Array.isArray(source.objects)?source.objects.filter(id=>cellObjectIds.has(id)):[],windows:Array.isArray(source.windows)?source.windows.filter(side=>['top','right','bottom','left'].includes(side)):[],marks,final:personIds.has(source.final)?source.final:null,excluded:!!source.excluded})});
     if(!state.rooms.some(r=>r.id===state.activeRoomId))state.activeRoomId=state.rooms[0]?.id||null;
     const cellObjects=state.objects.filter(o=>!o.edge);if(!cellObjects.some(o=>o.id===state.activeObjectId))state.activeObjectId=cellObjects[0]?.id||null;
     if(!state.people.some(p=>p.id===state.activePersonId))state.activePersonId=state.people.find(p=>!p.victim)?.id||state.people[0]?.id||null;
@@ -400,6 +402,8 @@
   }
   function renderFilters(){
     $$('[data-display]',el.filterBar).forEach(b=>{const enabled=state.display[b.dataset.display]!==false;b.classList.toggle('active',enabled);b.setAttribute('aria-pressed',String(enabled))});
+    const objects=state.objects.filter(o=>!o.edge),hidden=new Set(state.hiddenObjectIds),visible=objects.filter(o=>!hidden.has(o.id)).length,filterBtn=$('#objectFilterBtn'),count=$('#objectFilterCount');
+    if(filterBtn){filterBtn.classList.toggle('filtered',hidden.size>0);filterBtn.setAttribute('aria-label',`Wybierz widoczne obiekty — ${visible} z ${objects.length}`)}if(count)count.textContent=hidden.size?`${visible}/${objects.length}`:'Wszystkie';
   }
   function renderStrip(){
     if(state.mode==='build'){
@@ -425,8 +429,8 @@
       const autoCell=cellAutoReason(i),blockedByObject=objectBlocks(cell);let inner='';
       if(!cell.blocked){
         if(state.display.objects){
-          const objectList=cell.objects.map(getObj).filter(Boolean),countClass=objectList.length===1?'count-1':objectList.length===2?'count-2':objectList.length>4?'count-many':'';
-          const objs=objectList.map(o=>`<span class="object-badge" title="${esc(o.name)}">${objectIcon(o)}</span>`).join('');inner+=`<div class="objects ${countClass}">${objs}</div>`;
+          const hiddenObjects=new Set(state.hiddenObjectIds),objectList=cell.objects.map(getObj).filter(o=>o&&!o.edge&&!hiddenObjects.has(o.id)),countClass=objectList.length===1?'count-1':objectList.length===2?'count-2':objectList.length>4?'count-many':'';
+          if(objectList.length){const objs=objectList.map(o=>`<span class="object-badge" title="${esc(o.name)}">${objectIcon(o)}</span>`).join('');inner+=`<div class="objects ${countClass}">${objs}</div>`}
         }
         if(state.mode==='play'){
           if(cell.final){if(state.display.finals){const p=getPerson(cell.final);if(p)inner+=`<div class="final-token" style="background:${esc(p.color)}">${esc(p.code)}</div>`}}
@@ -439,7 +443,7 @@
           }
         }
       }
-      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}" aria-hidden="true"></span>`);if(cell.note)inner+='<span class="note-dot"></span>';
+      cell.windows.forEach(side=>inner+=`<span class="edge-window ${side}" aria-hidden="true">${EDGE_WINDOW_SVG}</span>`);if(cell.note)inner+='<span class="note-dot"></span>';
       html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     if(roomLabels.length){
@@ -531,7 +535,12 @@
   }
   function roomsSheet(){openSheet('Pokoje',`<div class="list">${state.rooms.map(r=>`<div class="list-row"><span style="width:34px;height:34px;border-radius:9px;background:${esc(r.color)}"></span><div><strong>${esc(r.name)}</strong><small>Dotknij narzędzia „Pokój”, aby malować pola</small></div><div class="actions"><button class="tiny" data-edit-room="${r.id}">✏️</button><button class="tiny" data-del-room="${r.id}">🗑</button></div></div>`).join('')}</div><button class="btn primary full" id="addRoom" style="margin-top:10px">＋ Dodaj pokój</button>`);$$('[data-edit-room]',el.sheetBody).forEach(b=>b.onclick=()=>roomForm(b.dataset.editRoom));$$('[data-del-room]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delRoom;change(()=>{state.rooms=state.rooms.filter(r=>r.id!==id);state.cells.forEach(c=>{if(c.roomId===id)c.roomId=null})});roomsSheet()});$('#addRoom').onclick=()=>roomForm(null)}
   function roomForm(id){const r=id?getRoom(id):{name:'',color:nextRoomColor()};openSheet(id?'Edytuj pokój':'Nowy pokój',`<div class="field"><label>Nazwa</label><input id="roomName" value="${esc(r.name)}" placeholder="Np. Salon"><div class="preset-row" aria-label="Standardowe nazwy pokojów">${ROOM_NAME_PRESETS.map(name=>`<button type="button" class="preset-badge" data-room-name="${esc(name)}">${esc(name)}</button>`).join('')}</div></div><div class="field"><label>Kolor pól</label><input id="roomColor" type="color" value="${esc(r.color)}"></div><button class="btn primary full" id="saveRoom">Zapisz</button>`);$$('[data-room-name]',el.sheetBody).forEach(b=>b.onclick=()=>{$('#roomName').value=b.dataset.roomName;$('#roomName').focus()});$('#saveRoom').onclick=()=>{const name=$('#roomName').value.trim();if(!name){toast('Podaj nazwę pokoju.');return}change(()=>{if(id)Object.assign(getRoom(id),{name,color:$('#roomColor').value});else{const n={id:uid('room'),name,color:$('#roomColor').value};state.rooms.push(n);state.activeRoomId=n.id}});roomsSheet()}}
-  function objectsSheet(){openSheet('Przedmioty',`<p class="hint"><span class="ok-text">Dozwolone:</span> fotel/krzesło, dywan, łóżko. <span class="danger-text">Niedozwolone:</span> stół, telewizor, roślina, regał i pudło. Okno ustawia się na krawędzi.</p><div class="list">${state.objects.map(o=>`<div class="list-row"><span style="font-size:32px;display:grid;place-items:center;width:40px;height:40px">${objectIcon(o)}</span><div><strong>${esc(o.name)}</strong><small>${o.edge?'Obiekt krawędziowy':o.occupiable?'Może być zajęty':'Nie może być zajęty'}</small></div><div class="actions">${o.builtin?'':`<button class="tiny" data-edit-object="${o.id}">✏️</button><button class="tiny" data-del-object="${o.id}">🗑</button>`}</div></div>`).join('')}</div><button class="btn primary full" id="addObject" style="margin-top:10px">＋ Dodaj własny przedmiot</button>`);$$('[data-edit-object]',el.sheetBody).forEach(b=>b.onclick=()=>objectForm(b.dataset.editObject));$$('[data-del-object]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delObject;change(()=>{state.objects=state.objects.filter(o=>o.id!==id);state.cells.forEach(c=>c.objects=c.objects.filter(x=>x!==id))});objectsSheet()});$('#addObject').onclick=()=>objectForm(null)}
+  function objectsSheet(){openSheet('Przedmioty',`<p class="hint"><span class="ok-text">Dozwolone:</span> fotel/krzesło, dywan, łóżko. <span class="danger-text">Niedozwolone:</span> stół, telewizor, roślina, regał i pudło. Okno ustawia się na krawędzi.</p><div class="list">${state.objects.map(o=>`<div class="list-row"><span style="font-size:32px;display:grid;place-items:center;width:40px;height:40px">${objectIcon(o)}</span><div><strong>${esc(o.name)}</strong><small>${o.edge?'Obiekt krawędziowy':o.occupiable?'Może być zajęty':'Nie może być zajęty'}</small></div><div class="actions">${o.builtin?'':`<button class="tiny" data-edit-object="${o.id}">✏️</button><button class="tiny" data-del-object="${o.id}">🗑</button>`}</div></div>`).join('')}</div><button class="btn primary full" id="addObject" style="margin-top:10px">＋ Dodaj własny przedmiot</button>`);$$('[data-edit-object]',el.sheetBody).forEach(b=>b.onclick=()=>objectForm(b.dataset.editObject));$$('[data-del-object]',el.sheetBody).forEach(b=>b.onclick=()=>{const id=b.dataset.delObject;change(()=>{state.objects=state.objects.filter(o=>o.id!==id);state.hiddenObjectIds=state.hiddenObjectIds.filter(x=>x!==id);state.cells.forEach(c=>c.objects=c.objects.filter(x=>x!==id))});objectsSheet()});$('#addObject').onclick=()=>objectForm(null)}
+  function objectFilterSheet(){
+    const objects=state.objects.filter(o=>!o.edge),hidden=new Set(state.hiddenObjectIds);openSheet('Widoczne obiekty',`<p class="hint">Odznaczone obiekty znikają tylko z widoku planszy. Nadal pozostają na polach i wpływają na reguły gry.</p><div class="section">${objects.map(o=>`<label class="toggle"><input type="checkbox" data-object-visible="${o.id}" ${hidden.has(o.id)?'':'checked'}><span style="display:flex;align-items:center;gap:10px"><span style="font-size:27px;width:34px;display:grid;place-items:center">${objectIcon(o)}</span><strong>${esc(o.name)}</strong></span></label>`).join('')||'<p class="hint">Brak obiektów do filtrowania.</p>'}</div><div class="grid2"><button class="btn" id="showAllObjects">Pokaż wszystkie</button><button class="btn" id="hideAllObjects">Ukryj wszystkie</button></div>`);
+    $$('[data-object-visible]',el.sheetBody).forEach(input=>input.onchange=()=>{const ids=new Set(state.hiddenObjectIds),id=input.dataset.objectVisible;input.checked?ids.delete(id):ids.add(id);state.hiddenObjectIds=[...ids];renderFilters();renderBoard();saveSoon()});
+    $('#showAllObjects').onclick=()=>{state.hiddenObjectIds=[];renderAll();objectFilterSheet();saveSoon()};$('#hideAllObjects').onclick=()=>{state.hiddenObjectIds=objects.map(o=>o.id);renderAll();objectFilterSheet();saveSoon()};
+  }
   function objectForm(id){const o=id?getObj(id):{name:'',symbol:'◆',occupiable:true};openSheet(id?'Edytuj przedmiot':'Nowy przedmiot',`<div class="field"><label>Nazwa</label><input id="objName" value="${esc(o.name)}"></div><div class="field"><label>Emoji lub krótki symbol</label><input id="objSymbol" value="${esc(o.symbol)}" maxlength="4"></div><label class="toggle"><input id="objOcc" type="checkbox" ${o.occupiable?'checked':''}><span>Osoba może zajmować pole z tym przedmiotem</span></label><button class="btn primary full" id="saveObject">Zapisz</button>`);$('#saveObject').onclick=()=>{const name=$('#objName').value.trim(),symbol=$('#objSymbol').value.trim();if(!name||!symbol){toast('Podaj nazwę i symbol.');return}change(()=>{if(id)Object.assign(getObj(id),{name,symbol,occupiable:$('#objOcc').checked});else{const n={id:uid('obj'),name,symbol,occupiable:$('#objOcc').checked,edge:false,builtin:false};state.objects.push(n);state.activeObjectId=n.id}});objectsSheet()}}
   function rulesSheet(){openSheet('Reguły i wskazówki',`<div class="section"><label class="toggle"><input id="autoX" type="checkbox" ${state.rules.autoX?'checked':''}><span>Pokazuj automatyczne X</span></label><label class="toggle"><input id="rowsCols" type="checkbox" ${state.rules.uniqueRowsCols?'checked':''}><span>Każda osoba w innym wierszu i kolumnie</span></label><label class="toggle"><input id="uniquePeople" type="checkbox" ${state.rules.uniquePeople?'checked':''}><span>Każda osoba tylko raz na planszy</span></label><label class="toggle"><input id="equip" type="checkbox" ${state.rules.forbidEquipment?'checked':''}><span>Blokuj stół, TV, roślinę, regał i pudło</span></label></div><div class="field"><label>Opis wskazówek z książki</label><textarea id="clues" placeholder="Przepisz wskazówki…">${esc(state.clues)}</textarea></div><button class="btn primary full" id="saveRules">Zapisz</button>`);$('#saveRules').onclick=()=>{change(()=>{state.rules.autoX=$('#autoX').checked;state.rules.uniqueRowsCols=$('#rowsCols').checked;state.rules.uniquePeople=$('#uniquePeople').checked;state.rules.forbidEquipment=$('#equip').checked;state.clues=$('#clues').value});closeSheet()}}
   function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Wybierz narzędzie na dole. Nad narzędziami pojawią się pokoje, przedmioty albo osoby.</li><li>Opcja <strong>Czyść</strong> resetuje każde dotknięte pole wraz z pokojem, przedmiotami, oknami i oznaczeniami.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia jedno duże X na całym polu, a „Finalnie” ustawia osobę.</li><li>Po finalnym ustawieniu pola w tym samym wierszu i kolumnie dostają automatyczne X. Niedozwolone wyposażenie pozostaje widoczne bez X, ale nie można na nim ustawić osoby.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li><li>„Obok” oznacza bezpośrednio górę, dół, lewo lub prawo oraz ten sam pokój.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
@@ -548,7 +557,7 @@
   el.buildMode.onclick=()=>{state.mode='build';renderAll();saveSoon()};el.playMode.onclick=()=>{state.mode='play';state.clearMode=false;renderAll();saveSoon()};
   el.buildTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.buildTool=b.dataset.tool;state.clearMode=false;renderAll();saveSoon()});
   el.playTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;state.playTool=b.dataset.tool;if(state.playTool==='candidate'){const visible=peopleForStrip();if(!visible.some(p=>p.id===state.activePersonId))state.activePersonId=visible[0]?.id||null}renderAll();saveSoon()});
-  el.filterBar.addEventListener('click',e=>{const b=e.target.closest('[data-display]');if(!b)return;const key=b.dataset.display;state.display[key]=!state.display[key];renderAll();saveSoon()});
+  el.filterBar.addEventListener('click',e=>{const action=e.target.closest('[data-filter-action]');if(action){if(action.dataset.filterAction==='objects')objectFilterSheet();return}const b=e.target.closest('[data-display]');if(!b)return;const key=b.dataset.display;state.display[key]=!state.display[key];renderAll();saveSoon()});
   el.activeStrip.addEventListener('click',e=>{const r=e.target.closest('[data-room]'),o=e.target.closest('[data-object]'),p=e.target.closest('[data-person]'),a=e.target.closest('[data-action]');if(r){state.activeRoomId=r.dataset.room;state.clearMode=false;renderStrip();saveSoon()}else if(o){state.activeObjectId=o.dataset.object;state.clearMode=false;renderStrip();saveSoon()}else if(p){state.activePersonId=p.dataset.person;renderAll();saveSoon()}else if(a){if(a.dataset.action==='clear-mode'){state.clearMode=!state.clearMode;renderAll();saveSoon();toast(state.clearMode?'Tryb czyszczenia: dotknij pola.':'Tryb czyszczenia wyłączony.');return}({rooms:roomsSheet,objects:objectsSheet,people:peopleSheet,setup:setupSheet,cell:()=>state.selected==null?toast('Najpierw wybierz pole.'):openCellSheet(state.selected)})[a.dataset.action]?.()}});
   el.menu.onclick=menuSheet;el.closeSheet.onclick=closeSheet;el.backdrop.onclick=closeSheet;
   el.title.addEventListener('input',e=>{state.title=e.target.value;saveSoon()});
