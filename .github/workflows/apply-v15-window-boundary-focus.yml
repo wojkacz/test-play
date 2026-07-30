@@ -1,0 +1,61 @@
+name: Apply Murdoku v15 window boundary focus
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  apply:
+    if: github.event.pull_request.title == 'Apply Murdoku v15 window boundary focus'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply and verify v15 patch
+        run: |
+          echo "6ccbe1577c5e1ea33fd27a58c608efcad24d2f73cd0cbf1e0b0dcaf63bc61b67  .patches/v15/part-00" | sha256sum -c -
+          echo "22bc36713d006edfaee465ef0771cd39e96e6bf7f99f20049ece59857470b9a3  .patches/v15/part-01" | sha256sum -c -
+          cat .patches/v15/part-* | base64 -d | gzip -d > /tmp/murdoku-v15.patch
+          git apply --check /tmp/murdoku-v15.patch
+          git apply /tmp/murdoku-v15.patch
+          test "$(git hash-object index.html)" = "a3cf7a7242faeec6a619d4f761ee76d54b5e40f5"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          checks = [
+              'version:15' in html,
+              'state.version=15' in html,
+              '.cell.person-focus{border:4px solid var(--accent2)!important' in html,
+              '.cell.person-focus::after' not in html,
+              '.board-window.horizontal{width:calc(var(--cell-size) * .76);height:8px}' in html,
+              '.board-window.vertical{width:8px;height:calc(var(--cell-size) * .76)}' in html,
+              'function windowEdgesData()' in html,
+              "state.cells.forEach((cell,i)=>['right','bottom'].forEach" in html,
+              'class="board-window ${edge.orientation}"' in html,
+              'EDGE_WINDOW_SVG' not in html,
+              'edge-window' not in html,
+          ]
+          if not all(checks):
+              raise SystemExit('Static validation failed')
+          script = re.search(r'<script>\s*(.*?)\s*</script>', html, re.S)
+          if not script:
+              raise SystemExit('Missing script block')
+          Path('/tmp/murdoku-v15.js').write_text(script.group(1), encoding='utf-8')
+          PY
+          node --check /tmp/murdoku-v15.js
+      - name: Remove temporary patch tooling
+        run: rm -rf .patches .github/workflows/apply-v15-window-boundary-focus.yml
+      - name: Commit only index.html changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Center windows on room boundaries"
+          git push origin HEAD:${{ github.head_ref }}
