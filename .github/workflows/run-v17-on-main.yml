@@ -1,0 +1,43 @@
+name: Finalize Murdoku v17
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: contains(github.event.head_commit.message, 'Prepare Murdoku v17')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply embedded v17 transformation
+        run: |
+          test "$(git hash-object index.html)" = "808f89db10c77a7f6be12e2243ae768c5e8dae4a"
+          awk 'BEGIN{p=0} /python3 - <<'\''PY'\''/{p=1;next} p && /^          PY$/{exit} p{sub(/^          /,"");print}' .github/workflows/run-v17-on-push.yml > /tmp/v17-transform.py
+          python3 /tmp/v17-transform.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('index.html').read_text(encoding='utf-8')
+          required=['version:17','state.version=17','align-items:center;justify-content:flex-end','const fontSize=clamp(cellSize*.095,6,16)','function removeRoomZone(start)','function clearBlockedZone(start)','id="quickRemoveRoom"','id="quickRemoveBlocked"']
+          if not all(item in html for item in required): raise SystemExit('v17 static validation failed')
+          script=re.search(r'<script>\s*(.*?)\s*</script>',html,re.S)
+          if not script: raise SystemExit('Missing script')
+          Path('/tmp/murdoku-v17.js').write_text(script.group(1),encoding='utf-8')
+          PY
+          node --check /tmp/murdoku-v17.js
+          test "$(git hash-object index.html)" = "63625a9d35c49f1c9f8ef962a2e69ed236495bba"
+      - name: Commit final application only
+        run: |
+          rm -f .github/workflows/apply-v17-room-label-zone-removal.yml .github/workflows/run-v17-on-push.yml .github/workflows/run-v17-on-main.yml .trigger-v17
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Scale room labels and remove build zones"
+          git push origin HEAD:main
