@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0d1222">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Murdoku — mobilny kreator planszy v18</title>
+  <title>Murdoku — mobilny kreator planszy v19</title>
   <style>
     :root{
       --bg:#0d1222;--panel:#151d31;--panel2:#1d2842;--line:#33415f;
@@ -280,7 +280,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:18,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,controlsCollapsed:false,historyCollapsed:false,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
+  const makeState=()=>({version:19,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,controlsCollapsed:false,historyCollapsed:false,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null,personTap={id:null,time:0},gesture=null,pinch=null,pinchFrame=0,dismissedWarningKey='';
@@ -293,7 +293,7 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=18;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);state.controlsCollapsed=!!state.controlsCollapsed;state.historyCollapsed=!!state.historyCollapsed;
+    const d=makeState();state=Object.assign(d,state||{});state.version=19;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);state.controlsCollapsed=!!state.controlsCollapsed;state.historyCollapsed=!!state.historyCollapsed;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
@@ -578,7 +578,8 @@
         }
       }
       if(cell.note)inner+='<span class="note-dot"></span>';
-      const personFocused=!!activePerson&&((state.display.finals&&cell.final===activePerson)||(state.display.candidates&&cell.marks[activePerson]==='candidate'));
+      const focusExcluded=cell.blocked||cell.excluded||!!autoCell||blockedByObject;
+      const personFocused=!!activePerson&&!focusExcluded&&((state.display.finals&&cell.final===activePerson)||(state.display.candidates&&cell.marks[activePerson]==='candidate'));
       html+=`<button class="cell ${cell.blocked?'blocked':''} ${state.selected===i?'selected':''} ${state.display.finals&&bad.has(i)?'conflict':''} ${state.display.excluded&&autoCell&&!cell.blocked?'auto-blocked':''} ${personFocused?'person-focus':''} ${gesture?.painting&&gesture.visited?.has(i)?'paint-visited':''}" data-index="${i}" style="${style.join(';')}">${inner}</button>`;
     });
     const windows=windowEdgesData();if(windows.length){html+=windows.map(edge=>`<span class="board-window ${edge.orientation}" aria-hidden="true" style="left:calc(${edge.x} * var(--cell-size));top:calc(${edge.y} * var(--cell-size))"></span>`).join('')}
