@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0d1222">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Murdoku — mobilny kreator planszy</title>
+  <title>Murdoku — mobilny kreator planszy v18</title>
   <style>
     :root{
       --bg:#0d1222;--panel:#151d31;--panel2:#1d2842;--line:#33415f;
@@ -33,7 +33,12 @@
     .brand b{color:var(--accent2)}
     .title{min-width:0;flex:1;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 11px;font-weight:800}
     .icon-btn,.menu-btn{min-width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font-size:19px;font-weight:900}
-    .mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;background:#090e1b;border:1px solid var(--line);border-radius:13px;padding:4px}
+    .controls-toggle{font-size:17px;transition:transform .2s ease}
+    .mode-switch,.filterbar,.board-controls{transition:max-height .24s ease,opacity .18s ease,transform .24s ease,padding .24s ease,margin .24s ease,border-width .24s ease;overflow:hidden}
+    .mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;background:#090e1b;border:1px solid var(--line);border-radius:13px;padding:4px;max-height:58px}
+    .filterbar{max-height:58px}
+    .board-controls{max-height:52px}
+    .app.controls-collapsed .mode-switch,.app.controls-collapsed .filterbar,.app.controls-collapsed .board-controls{max-height:0;opacity:0;transform:translateY(-8px);padding-top:0;padding-bottom:0;margin-top:0;border-top-width:0;border-bottom-width:0;pointer-events:none}
     .mode-switch button{min-height:40px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:900}
     .mode-switch button.active{background:var(--accent);color:#fff}
 
@@ -48,7 +53,9 @@
     .board-controls{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 10px;background:#0f1729;border-bottom:1px solid var(--line)}
     .zoom-btn{min-height:34px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:5px 11px;font-size:13px;font-weight:900}
     .zoom-btn.square{width:38px;padding:5px;font-size:18px}
-    .status-info{margin:7px 10px 0;padding:8px 10px;border:1px solid rgba(251,191,36,.48);border-radius:11px;background:rgba(251,191,36,.09);color:#fde68a;font-size:12px;line-height:1.35}
+    .status-info{margin:7px 10px 0;padding:8px 8px 8px 10px;border:1px solid rgba(251,191,36,.48);border-radius:11px;background:rgba(251,191,36,.09);color:#fde68a;font-size:12px;line-height:1.35;display:flex;align-items:flex-start;gap:8px}
+    .status-info-text{flex:1;min-width:0}
+    .status-close{flex:none;width:28px;height:28px;border:0;border-radius:8px;background:rgba(251,191,36,.13);color:#fde68a;font-size:15px;font-weight:950;display:grid;place-items:center}
 
     .board-wrap{position:relative;flex:1;min-height:0;overflow:auto;padding:10px 10px 18px;display:flex;align-items:flex-start;justify-content:flex-start;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
     .board-shell{position:relative;margin:0 auto;border:2px solid #d8e0ef;border-radius:10px;overflow:hidden;background:#d5dce8;box-shadow:0 16px 36px rgba(0,0,0,.32);flex:none}
@@ -96,6 +103,8 @@
 
     .bottom{position:sticky;bottom:0;z-index:35;background:rgba(13,18,34,.97);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safeBottom))}
     .active-strip{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:3px 2px 9px}
+    .active-strip.split-strip{overflow:hidden}
+    .active-strip.split-strip .strip-grow{flex:1 1 auto;min-width:0;justify-content:center;white-space:normal;text-align:center}
     .active-strip::-webkit-scrollbar{display:none}
     .person-chip,.object-chip,.room-chip{flex:none;min-height:42px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:850}
     .instruction-chip{flex:1 0 100%;width:100%;justify-content:center}
@@ -110,6 +119,15 @@
     .history-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;margin-top:6px}
     .history-btn{width:100%;min-height:40px;border:1px solid var(--line);background:var(--panel);border-radius:11px;color:var(--text);font-weight:900}
     .history-btn:disabled{opacity:.38}
+    .history-panel{margin-top:6px;border:1px solid var(--line);border-radius:12px;background:#0e1526;overflow:hidden}
+    .history-panel-toggle{width:100%;min-height:38px;border:0;background:#182137;color:var(--text);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:900;text-align:left}
+    .history-panel-body{display:grid;gap:8px;padding:8px;max-height:190px;overflow:auto}
+    .history-panel.collapsed .history-panel-body{display:none}
+    .history-group{display:grid;gap:4px}
+    .history-group-title{font-size:10px;color:var(--muted);font-weight:950;text-transform:uppercase;letter-spacing:.05em}
+    .history-item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px;align-items:start;padding:6px 7px;border-radius:8px;background:#111a2d;color:#dbe5f8;font-size:11px;line-height:1.28}
+    .history-item.redo{background:#17223a;color:#c7d2fe}
+    .history-empty{padding:2px 1px;color:var(--muted);font-size:11px}
     .tool{min-width:0;min-height:50px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:5px 2px;color:var(--muted);font-size:10px;font-weight:900;display:grid;place-items:center;line-height:1.05}
     .tool span{display:block;font-size:20px;margin-bottom:2px;color:var(--text)}
     .tool.active{border-color:var(--accent);background:rgba(139,92,246,.2);color:#fff}
@@ -163,6 +181,7 @@
     <div class="toprow">
       <div class="brand">MUR<b>DOKU</b></div>
       <input class="title" id="titleInput" value="Moja zagadka" aria-label="Nazwa zagadki">
+      <button class="icon-btn controls-toggle" id="controlsToggleBtn" aria-label="Zwiń górne paski" aria-expanded="true">▲</button>
       <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
     </div>
     <div class="mode-switch">
@@ -209,6 +228,10 @@
     <div class="history-row" id="playHistory" hidden>
       <button class="history-btn" id="playUndoBtn">↶ Cofnij</button>
       <button class="history-btn" id="playRedoBtn">↷ Ponów</button>
+    </div>
+    <div class="history-panel" id="historyPanel" hidden>
+      <button class="history-panel-toggle" id="historyToggleBtn" aria-expanded="true"><span>Ostatnie akcje</span><span id="historyToggleIcon">▲</span></button>
+      <div class="history-panel-body" id="historyList"></div>
     </div>
   </footer>
 </div>
@@ -257,20 +280,20 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:17,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
+  const makeState=()=>({version:18,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,controlsCollapsed:false,historyCollapsed:false,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
-  let history=[],future=[],toastTimer=null,saveTimer=null,personTap={id:null,time:0},gesture=null,pinch=null,pinchFrame=0;
+  let history=[],future=[],toastTimer=null,saveTimer=null,personTap={id:null,time:0},gesture=null,pinch=null,pinchFrame=0,dismissedWarningKey='';
   normalize();
 
   const el={
-    app:$('#app'),title:$('#titleInput'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),statusInfo:$('#statusInfo'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),zoomOut:$('#zoomOutBtn'),zoomFit:$('#zoomFitBtn'),zoomIn:$('#zoomInBtn'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),playHistory:$('#playHistory'),playUndo:$('#playUndoBtn'),playRedo:$('#playRedoBtn'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
+    app:$('#app'),title:$('#titleInput'),controlsToggle:$('#controlsToggleBtn'),buildMode:$('#buildModeBtn'),playMode:$('#playModeBtn'),filterBar:$('#filterBar'),statusInfo:$('#statusInfo'),murdererBox:$('#murdererBox'),board:$('#board'),boardWrap:$('#boardWrap'),boardShell:$('#boardShell'),zoomOut:$('#zoomOutBtn'),zoomFit:$('#zoomFitBtn'),zoomIn:$('#zoomInBtn'),activeStrip:$('#activeStrip'),buildTools:$('#buildTools'),playTools:$('#playTools'),playHistory:$('#playHistory'),playUndo:$('#playUndoBtn'),playRedo:$('#playRedoBtn'),historyPanel:$('#historyPanel'),historyToggle:$('#historyToggleBtn'),historyToggleIcon:$('#historyToggleIcon'),historyList:$('#historyList'),menu:$('#menuBtn'),backdrop:$('#backdrop'),sheet:$('#sheet'),sheetTitle:$('#sheetTitle'),sheetBody:$('#sheetBody'),closeSheet:$('#closeSheetBtn'),toast:$('#toast'),importInput:$('#importInput')
   };
 
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=17;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);
+    const d=makeState();state=Object.assign(d,state||{});state.version=18;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);state.controlsCollapsed=!!state.controlsCollapsed;state.historyCollapsed=!!state.historyCollapsed;
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
@@ -287,10 +310,50 @@
     if(!state.people.some(p=>p.id===state.focusPersonId))state.focusPersonId=null;
     if(state.selected!=null&&(state.selected<0||state.selected>=need))state.selected=null;
   }
-  function snapshot(){history.push(JSON.stringify(state));if(history.length>60)history.shift();future=[]}
-  function change(fn,render=true){snapshot();fn();normalize();if(render)renderAll();saveSoon()}
-  function undo(){if(!history.length)return;const ui={zoom:state.zoom,focusPersonId:state.focusPersonId};future.push(JSON.stringify(state));state=JSON.parse(history.pop());state.zoom=ui.zoom;state.focusPersonId=ui.focusPersonId;normalize();renderAll();saveSoon()}
-  function redo(){if(!future.length)return;const ui={zoom:state.zoom,focusPersonId:state.focusPersonId};history.push(JSON.stringify(state));state=JSON.parse(future.pop());state.zoom=ui.zoom;state.focusPersonId=ui.focusPersonId;normalize();renderAll();saveSoon()}
+  function historyState(entry){return typeof entry==='string'?entry:entry?.state}
+  function historyLabel(entry){return typeof entry==='string'?'Zmiana planszy':entry?.label||'Zmiana planszy'}
+  function pushHistory(snapshotState,label){history.push({state:snapshotState,label:label||'Zmiana planszy'});if(history.length>60)history.shift();future=[]}
+  function fieldName(i){const p=rc(i);return`${p.r+1}×${p.c+1}`}
+  function describeStateChange(before,after){
+    if(before.rows!==after.rows||before.cols!==after.cols)return`Zmieniono planszę na ${after.rows}×${after.cols}`;
+    const beforeCells=before.cells||[],afterCells=after.cells||[],changed=[];
+    for(let i=0;i<Math.max(beforeCells.length,afterCells.length);i++)if(JSON.stringify(beforeCells[i])!==JSON.stringify(afterCells[i]))changed.push(i);
+    if(changed.length){
+      const roomAdded=new Map(),roomRemoved=new Map(),blockedOn=[],blockedOff=[],excludedOn=[],excludedOff=[],candidateAdded=new Map(),candidateRemoved=new Map(),finalAdded=[],finalRemoved=[],objectAdded=[],objectRemoved=[],windowChanged=[];
+      changed.forEach(i=>{const a=beforeCells[i]||makeCell(),b=afterCells[i]||makeCell();
+        if(a.roomId!==b.roomId){if(a.roomId)roomRemoved.set(a.roomId,(roomRemoved.get(a.roomId)||0)+1);if(b.roomId)roomAdded.set(b.roomId,(roomAdded.get(b.roomId)||0)+1)}
+        if(a.blocked!==b.blocked)(b.blocked?blockedOn:blockedOff).push(i);
+        if(a.excluded!==b.excluded)(b.excluded?excludedOn:excludedOff).push(i);
+        const ids=new Set([...Object.keys(a.marks||{}),...Object.keys(b.marks||{})]);ids.forEach(id=>{const av=a.marks?.[id],bv=b.marks?.[id];if(av!==bv){const map=bv==='candidate'?candidateAdded:candidateRemoved;map.set(id,(map.get(id)||0)+1)}});
+        if(a.final!==b.final){if(a.final)finalRemoved.push({id:a.final,i});if(b.final)finalAdded.push({id:b.final,i})}
+        const ao=new Set(a.objects||[]),bo=new Set(b.objects||[]);bo.forEach(id=>{if(!ao.has(id))objectAdded.push({id,i})});ao.forEach(id=>{if(!bo.has(id))objectRemoved.push({id,i})});
+        if(JSON.stringify(a.windows||[])!==JSON.stringify(b.windows||[]))windowChanged.push(i);
+      });
+      if(roomAdded.size===1&&!roomRemoved.size){const [id,count]=[...roomAdded][0];return`Przypisano pokój „${getRoom(id)?.name||'pokój'}” do ${count} ${fieldWord(count)}`}
+      if(roomRemoved.size===1&&!roomAdded.size){const [id,count]=[...roomRemoved][0];return`Usunięto pokój „${getRoom(id)?.name||'pokój'}” z ${count} ${fieldWord(count)}`}
+      if(blockedOn.length&&!blockedOff.length)return blockedOn.length===1?`Zablokowano pole ${fieldName(blockedOn[0])}`:`Zablokowano ${blockedOn.length} pola`;
+      if(blockedOff.length&&!blockedOn.length)return blockedOff.length===1?`Odblokowano pole ${fieldName(blockedOff[0])}`:`Odblokowano ${blockedOff.length} pola`;
+      if(excludedOn.length&&!excludedOff.length)return excludedOn.length===1?`Wykluczono pole ${fieldName(excludedOn[0])}`:`Wykluczono ${excludedOn.length} pola`;
+      if(excludedOff.length&&!excludedOn.length)return excludedOff.length===1?`Usunięto wykluczenie pola ${fieldName(excludedOff[0])}`:`Usunięto wykluczenie z ${excludedOff.length} pól`;
+      if(candidateAdded.size===1&&!candidateRemoved.size){const [id,count]=[...candidateAdded][0],code=getPerson(id)?.code||'?';return count===1?`Dodano ${code} jako możliwe na polu ${fieldName(changed[0])}`:`Dodano ${code} jako możliwe na ${count} polach`}
+      if(candidateRemoved.size===1&&!candidateAdded.size){const [id,count]=[...candidateRemoved][0],code=getPerson(id)?.code||'?';return count===1?`Usunięto możliwość ${code} z pola ${fieldName(changed[0])}`:`Usunięto możliwość ${code} z ${count} pól`}
+      if(finalAdded.length===1){const x=finalAdded[0];return`Ustawiono ${getPerson(x.id)?.code||'?'} finalnie na polu ${fieldName(x.i)}`}
+      if(finalRemoved.length===1&&!finalAdded.length){const x=finalRemoved[0];return`Usunięto finalną pozycję ${getPerson(x.id)?.code||'osoby'}`}
+      if(objectAdded.length===1&&!objectRemoved.length){const x=objectAdded[0];return`Dodano ${getObj(x.id)?.name||'przedmiot'} na polu ${fieldName(x.i)}`}
+      if(objectRemoved.length===1&&!objectAdded.length){const x=objectRemoved[0];return`Usunięto ${getObj(x.id)?.name||'przedmiot'} z pola ${fieldName(x.i)}`}
+      if(windowChanged.length)return windowChanged.length<=2?`Zmieniono okno przy polu ${fieldName(windowChanged[0])}`:`Zmieniono okna na planszy`;
+      return changed.length===1?`Zmieniono pole ${fieldName(changed[0])}`:`Zmieniono ${changed.length} pól`;
+    }
+    if((before.people||[]).length!==(after.people||[]).length)return(after.people||[]).length>(before.people||[]).length?'Dodano osobę':'Usunięto osobę';
+    if((before.rooms||[]).length!==(after.rooms||[]).length)return(after.rooms||[]).length>(before.rooms||[]).length?'Dodano pokój':'Usunięto pokój z listy';
+    if((before.objects||[]).length!==(after.objects||[]).length)return(after.objects||[]).length>(before.objects||[]).length?'Dodano przedmiot':'Usunięto przedmiot';
+    if(JSON.stringify(before.rules)!==JSON.stringify(after.rules)||before.clues!==after.clues)return'Zmieniono reguły lub wskazówki';
+    return'Zmiana ustawień';
+  }
+  function snapshot(label='Zmiana planszy'){pushHistory(JSON.stringify(state),label)}
+  function change(fn,render=true,label=null){const before=JSON.stringify(state),beforeState=JSON.parse(before);fn();normalize();const after=JSON.stringify(state);if(after!==before)pushHistory(before,label||describeStateChange(beforeState,state));if(render)renderAll();saveSoon()}
+  function undo(){if(!history.length)return;const ui={zoom:state.zoom,focusPersonId:state.focusPersonId,controlsCollapsed:state.controlsCollapsed,historyCollapsed:state.historyCollapsed},entry=history.pop();future.push({state:JSON.stringify(state),label:historyLabel(entry)});state=JSON.parse(historyState(entry));Object.assign(state,ui);normalize();dismissedWarningKey='';renderAll();saveSoon()}
+  function redo(){if(!future.length)return;const ui={zoom:state.zoom,focusPersonId:state.focusPersonId,controlsCollapsed:state.controlsCollapsed,historyCollapsed:state.historyCollapsed},entry=future.pop();history.push({state:JSON.stringify(state),label:historyLabel(entry)});if(history.length>60)history.shift();state=JSON.parse(historyState(entry));Object.assign(state,ui);normalize();dismissedWarningKey='';renderAll();saveSoon()}
   function getObj(id){return state.objects.find(o=>o.id===id)}
   function getRoom(id){return state.rooms.find(r=>r.id===id)}
   function getPerson(id){return state.people.find(p=>p.id===id)}
@@ -459,10 +522,16 @@
   function fitCellSize(){const available=Math.max(260,(el.boardWrap?.clientWidth||Math.min(window.innerWidth,760))-22),ideal=Math.floor(available/state.cols),base=clamp(ideal,22,96),size=clamp(Math.round(base*state.zoom),20,176);document.documentElement.style.setProperty('--cell-size',size+'px');if(el.zoomFit)el.zoomFit.textContent=`Dopasuj · ${Math.round(state.zoom*100)}%`}
   function setZoom(value){state.zoom=clamp(Math.round(value*100)/100,.65,1.8);fitCellSize();renderBoard();saveSoon()}
 
-  function renderAll(){fitCellSize();renderMode();renderFilters();renderStrip();renderBoard();renderStatus();renderMurderer()}
+  function renderAll(){fitCellSize();renderMode();renderFilters();renderStrip();renderBoard();renderStatus();renderMurderer();renderHistory()}
   function renderMode(){
-    const build=state.mode==='build';el.buildMode.classList.toggle('active',build);el.playMode.classList.toggle('active',!build);el.buildTools.hidden=!build;el.playTools.hidden=build;el.playHistory.hidden=build;el.playUndo.disabled=!history.length;el.playRedo.disabled=!future.length;el.zoomOut.disabled=state.zoom<=.65;el.zoomIn.disabled=state.zoom>=1.8;el.title.value=state.title;
+    const build=state.mode==='build';el.app.classList.toggle('controls-collapsed',state.controlsCollapsed);el.controlsToggle.textContent=state.controlsCollapsed?'▼':'▲';el.controlsToggle.setAttribute('aria-expanded',String(!state.controlsCollapsed));el.controlsToggle.setAttribute('aria-label',state.controlsCollapsed?'Rozwiń górne paski':'Zwiń górne paski');el.buildMode.classList.toggle('active',build);el.playMode.classList.toggle('active',!build);el.buildTools.hidden=!build;el.playTools.hidden=build;el.playHistory.hidden=build;el.historyPanel.hidden=build;el.historyPanel.classList.toggle('collapsed',state.historyCollapsed);el.historyToggle.setAttribute('aria-expanded',String(!state.historyCollapsed));el.historyToggleIcon.textContent=state.historyCollapsed?'▼':'▲';el.playUndo.disabled=!history.length;el.playRedo.disabled=!future.length;el.zoomOut.disabled=state.zoom<=.65;el.zoomIn.disabled=state.zoom>=1.8;el.title.value=state.title;
     $$('#buildTools .tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.buildTool));$$('#playTools .tool[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.playTool));
+  }
+  function renderHistory(){
+    if(!el.historyList)return;const undoItems=history.slice(-4).reverse(),redoItems=future.slice(-4).reverse(),groups=[];
+    if(undoItems.length)groups.push(`<div class="history-group"><div class="history-group-title">Do cofnięcia</div>${undoItems.map((entry,index)=>`<div class="history-item"><span>↶</span><span>${index===0?'<strong>Następna:</strong> ':''}${esc(historyLabel(entry))}</span></div>`).join('')}</div>`);
+    if(redoItems.length)groups.push(`<div class="history-group"><div class="history-group-title">Do ponowienia</div>${redoItems.map((entry,index)=>`<div class="history-item redo"><span>↷</span><span>${index===0?'<strong>Następna:</strong> ':''}${esc(historyLabel(entry))}</span></div>`).join('')}</div>`);
+    el.historyList.innerHTML=groups.length?groups.join(''):'<div class="history-empty">Brak zapisanych akcji do cofnięcia lub ponowienia.</div>';
   }
   function renderFilters(){
     $$('[data-display]',el.filterBar).forEach(b=>{const enabled=state.display[b.dataset.display]!==false;b.classList.toggle('active',enabled);b.setAttribute('aria-pressed',String(enabled))});
@@ -470,12 +539,13 @@
     if(filterBtn){filterBtn.classList.toggle('filtered',hidden.size>0);filterBtn.setAttribute('aria-label',`Wybierz widoczne obiekty — ${visible} z ${objects.length}`)}if(count)count.textContent=hidden.size?`${visible}/${objects.length}`:'Wszystkie';
   }
   function renderStrip(){
+    const splitStrip=state.mode==='build'&&['window','block'].includes(state.buildTool);el.activeStrip.classList.toggle('split-strip',splitStrip);
     if(state.mode==='build'){
       const clear=`<button class="object-chip ${state.clearMode?'active':''}" data-action="clear-mode"><span style="font-size:20px">🧹</span>Czyść</button>`;
       if(state.buildTool==='room')el.activeStrip.innerHTML=clear+`<button class="room-chip" data-action="rooms">＋ pokoje</button>`+state.rooms.map(r=>`<button class="room-chip ${!state.clearMode&&r.id===state.activeRoomId?'active':''}" data-room="${r.id}"><span style="width:20px;height:20px;border-radius:6px;background:${esc(r.color)}"></span>${esc(r.name)}</button>`).join('');
       else if(state.buildTool==='object')el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="objects">＋ przedmioty</button>`+state.objects.filter(o=>!o.edge).map(o=>`<button class="object-chip ${!state.clearMode&&o.id===state.activeObjectId?'active':''}" data-object="${o.id}"><span style="font-size:21px">${objectIcon(o)}</span>${esc(o.name)}</button>`).join('');
-      else if(state.buildTool==='window')el.activeStrip.innerHTML=clear+`<button class="object-chip ${state.clearMode?'':'active'}"><span style="font-size:21px">🪟</span>Wybierz pole, potem krawędź</button>`;
-      else if(state.buildTool==='block')el.activeStrip.innerHTML=clear+`<button class="object-chip ${state.clearMode?'':'active'}"><span style="font-size:20px">▧</span>Dotknij, aby przełączyć blokadę</button>`;
+      else if(state.buildTool==='window')el.activeStrip.innerHTML=clear+`<button class="object-chip strip-grow ${state.clearMode?'':'active'}"><span style="font-size:21px">🪟</span>Wybierz pole, potem krawędź</button>`;
+      else if(state.buildTool==='block')el.activeStrip.innerHTML=clear+`<button class="object-chip strip-grow ${state.clearMode?'':'active'}"><span style="font-size:20px">▧</span>Dotknij, aby przełączyć blokadę</button>`;
       else el.activeStrip.innerHTML=clear+`<button class="object-chip" data-action="cell">✏️ Edytuj wybrane pole</button><button class="object-chip" data-action="setup">⚙️ Plansza</button>`;
     }else if(state.playTool==='x'){
       el.activeStrip.innerHTML=`<button class="person-chip active instruction-chip"><span class="person-dot" style="background:#dc2447">✕</span>Dotknij albo przytrzymaj i przeciągnij</button>`;
@@ -518,8 +588,10 @@
     el.board.innerHTML=html;
   }
   function renderStatus(){
-    const warnings=state.mode==='play'?candidateWarnings():[];if(!warnings.length){el.statusInfo.hidden=true;el.statusInfo.innerHTML='';return}
-    const shown=warnings.slice(0,2).map(({person})=>`<strong>${esc(person.code)}</strong>: wszystkie zaznaczone możliwości są obecnie zablokowane`).join(' · '),more=warnings.length>2?` · +${warnings.length-2} kolejne`:'';el.statusInfo.hidden=false;el.statusInfo.innerHTML=`ℹ️ ${shown}${more}`;
+    const warnings=state.mode==='play'?candidateWarnings():[],key=warnings.map(({person,stats})=>`${person.id}:${stats.marked}:${stats.available}`).sort().join('|');
+    if(!warnings.length){dismissedWarningKey='';el.statusInfo.hidden=true;el.statusInfo.innerHTML='';return}
+    if(key===dismissedWarningKey){el.statusInfo.hidden=true;el.statusInfo.innerHTML='';return}
+    const shown=warnings.slice(0,2).map(({person})=>`<strong>${esc(person.code)}</strong>: wszystkie zaznaczone możliwości są obecnie zablokowane`).join(' · '),more=warnings.length>2?` · +${warnings.length-2} kolejne`:'';el.statusInfo.hidden=false;el.statusInfo.innerHTML=`<div class="status-info-text">ℹ️ ${shown}${more}</div><button class="status-close" id="statusCloseBtn" aria-label="Zamknij informację">✕</button>`;$('#statusCloseBtn').onclick=()=>{dismissedWarningKey=key;el.statusInfo.hidden=true};
   }
 
   function renderMurderer(){
@@ -576,9 +648,9 @@
     openSheet(`Szybkie akcje — ${pos.r+1}×${pos.c+1}`,`${reason?`<div class="quick-reason">ℹ️ ${esc(reason)}</div>`:''}<div class="quick-actions">${actions.join('')}</div>`);
     const done=(message)=>{closeSheet();if(message)toast(message)};
     const roomToggle=$('#quickRoomToggle');if(roomToggle)roomToggle.onclick=()=>{change(()=>cell.roomId=cell.roomId===state.activeRoomId?null:state.activeRoomId);done()};
-    const fill=$('#quickFillRoom');if(fill)fill.onclick=()=>{let count=0;change(()=>{count=fillRoomZone(i,state.activeRoomId).length});done(count?`Wypełniono ${count} ${fieldWord(count)} w tej strefie.`:'Ta strefa nie zawiera białych pól.')};
-    const removeRoomBtn=$('#quickRemoveRoom');if(removeRoomBtn)removeRoomBtn.onclick=()=>{const roomName=getRoom(cell.roomId)?.name||'Pokój';let count=0;change(()=>{count=removeRoomZone(i).length});done(`Usunięto „${roomName}” z ${count} ${fieldWord(count)} wraz z przedmiotami.`)};
-    const removeBlockedBtn=$('#quickRemoveBlocked');if(removeBlockedBtn)removeBlockedBtn.onclick=()=>{let count=0;change(()=>{count=clearBlockedZone(i).length});done(`Odblokowano ${count} ${fieldWord(count)} w połączonej strefie.`)};
+    const fill=$('#quickFillRoom');if(fill)fill.onclick=()=>{let count=0;change(()=>{count=fillRoomZone(i,state.activeRoomId).length},true,`Wypełniono strefę pokojem „${getRoom(state.activeRoomId)?.name||'pokój'}”`);done(count?`Wypełniono ${count} ${fieldWord(count)} w tej strefie.`:'Ta strefa nie zawiera białych pól.')};
+    const removeRoomBtn=$('#quickRemoveRoom');if(removeRoomBtn)removeRoomBtn.onclick=()=>{const roomName=getRoom(cell.roomId)?.name||'Pokój';let count=0;change(()=>{count=removeRoomZone(i).length},true,`Usunięto cały pokój „${roomName}” wraz z przedmiotami`);done(`Usunięto „${roomName}” z ${count} ${fieldWord(count)} wraz z przedmiotami.`)};
+    const removeBlockedBtn=$('#quickRemoveBlocked');if(removeBlockedBtn)removeBlockedBtn.onclick=()=>{let count=0;change(()=>{count=clearBlockedZone(i).length},true,'Usunięto połączoną strefę Niedostępne');done(`Odblokowano ${count} ${fieldWord(count)} w połączonej strefie.`)};
     const objectBtn=$('#quickObject');if(objectBtn)objectBtn.onclick=()=>{change(()=>{const k=cell.objects.indexOf(state.activeObjectId);if(k>=0)cell.objects.splice(k,1);else cell.objects.push(state.activeObjectId)});done()};
     const windowBtn=$('#quickWindow');if(windowBtn)windowBtn.onclick=()=>openWindowSheet(i);
     const blockBtn=$('#quickBlock');if(blockBtn)blockBtn.onclick=()=>{change(()=>{cell.blocked=!cell.blocked;if(cell.blocked)clearGameMarksAt(i)});done()};
@@ -597,7 +669,7 @@
     }else if(gesture.tool==='x'){
       if(gesture.target){if(!cell.final&&!objectBlocks(cell)&&!cellAutoReason(i)&&!cell.excluded)mutate=()=>{cell.excluded=true;cell.marks={}}}else if(cell.excluded)mutate=()=>cell.excluded=false
     }
-    if(mutate){if(!gesture.changed){snapshot();gesture.changed=true}mutate();gesture.count++;renderBoard()}
+    if(mutate){if(!gesture.changed){const code=getPerson(gesture.personId)?.code||'?';snapshot(gesture.tool==='candidate'?(gesture.target?`Dodano ${code} jako możliwe przeciągnięciem`:`Usunięto możliwość ${code} przeciągnięciem`):(gesture.target?'Wykluczono pola przeciągnięciem':'Usunięto wykluczenia przeciągnięciem'));gesture.changed=true}mutate();gesture.count++;renderBoard()}
   }
   function beginCellGesture(e){
     if(e.pointerType==='mouse'&&e.button!==0)return;const cell=e.target.closest('.cell');if(!cell||pinch)return;cancelGesture();const index=Number(cell.dataset.index),g={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,startIndex:index,ready:false,moved:false,painting:false,visited:new Set(),changed:false,count:0,tool:state.mode==='play'?state.playTool:null,personId:state.activePersonId,target:null};gesture=g;
@@ -643,12 +715,12 @@
     <div class="section"><h3>Zapis</h3><div class="grid2"><button class="btn" id="exportBtn">⬇ Eksport JSON</button><button class="btn" id="importBtn">⬆ Import JSON</button></div><button class="btn full" id="printBtn" style="margin-top:8px">🖨 Drukuj</button></div>
     <div class="section"><h3>Gra i reset</h3><button class="btn full" id="rulesBtn">⚙️ Reguły i opis zagadki</button><button class="btn full" id="lastVictimBtn" style="margin-top:8px">☠️ Ustal ofiarę na ostatnim wolnym polu</button><button class="btn danger full" id="clearGameBtn" style="margin-top:8px">Wyczyść oznaczenia gry</button><button class="btn danger full" id="resetMapMenuBtn" style="margin-top:8px">🧹 Wyczyść całą mapę</button><button class="btn danger full" id="newProjectMenuBtn" style="margin-top:8px">Nowy pusty projekt</button></div>
     <button class="btn full" id="helpBtn">❔ Jak używać</button>`);
-    $('#undoBtn').onclick=()=>{undo();closeSheet()};$('#redoBtn').onclick=()=>{redo();closeSheet()};$('#setupBtn').onclick=setupSheet;$('#peopleBtn').onclick=peopleSheet;$('#roomsBtn').onclick=roomsSheet;$('#objectsBtn').onclick=objectsSheet;$('#rulesBtn').onclick=rulesSheet;$('#helpBtn').onclick=helpSheet;$('#printBtn').onclick=()=>window.print();$('#importBtn').onclick=()=>el.importInput.click();$('#exportBtn').onclick=exportProject;$('#lastVictimBtn').onclick=placeVictimLast;$('#clearGameBtn').onclick=()=>{change(()=>state.cells.forEach(c=>{c.final=null;c.marks={};c.excluded=false}));closeSheet();toast('Oznaczenia gry usunięte.')};$('#resetMapMenuBtn').onclick=()=>resetMapConfirmSheet(menuSheet);$('#newProjectMenuBtn').onclick=()=>newProjectConfirmSheet(menuSheet);
+    $('#undoBtn').onclick=()=>{undo();closeSheet()};$('#redoBtn').onclick=()=>{redo();closeSheet()};$('#setupBtn').onclick=setupSheet;$('#peopleBtn').onclick=peopleSheet;$('#roomsBtn').onclick=roomsSheet;$('#objectsBtn').onclick=objectsSheet;$('#rulesBtn').onclick=rulesSheet;$('#helpBtn').onclick=helpSheet;$('#printBtn').onclick=()=>window.print();$('#importBtn').onclick=()=>el.importInput.click();$('#exportBtn').onclick=exportProject;$('#lastVictimBtn').onclick=placeVictimLast;$('#clearGameBtn').onclick=()=>{change(()=>state.cells.forEach(c=>{c.final=null;c.marks={};c.excluded=false}),true,'Wyczyszczono wszystkie oznaczenia gry');closeSheet();toast('Oznaczenia gry usunięte.')};$('#resetMapMenuBtn').onclick=()=>resetMapConfirmSheet(menuSheet);$('#newProjectMenuBtn').onclick=()=>newProjectConfirmSheet(menuSheet);
   }
   function setupSheet(){openSheet('Plansza i reset',`<div class="section"><div class="grid2"><div class="field"><label>Wiersze</label><input id="rows" type="number" min="2" max="16" value="${state.rows}"></div><div class="field"><label>Kolumny</label><input id="cols" type="number" min="2" max="16" value="${state.cols}"></div></div><button class="btn primary full" id="resize">Zastosuj rozmiar</button><p class="hint">Istniejące pola pozostaną tam, gdzie to możliwe.</p></div><div class="section"><h3>Reset mapy</h3><button class="btn danger full" id="resetMap">🧹 Wyczyść całą mapę</button><p class="hint">Usuwa pokoje, przedmioty, okna, blokady i oznaczenia ze wszystkich pól. Zachowuje rozmiar, listę osób, pokojów i przedmiotów.</p></div><button class="btn danger full" id="newProject">Nowy pusty projekt</button>`);
     $('#resize').onclick=()=>{const nr=clamp(Number($('#rows').value)||state.rows,2,16),nc=clamp(Number($('#cols').value)||state.cols,2,16);change(()=>resize(nr,nc));closeSheet();toast('Rozmiar zmieniony.')};$('#resetMap').onclick=resetMapConfirmSheet;$('#newProject').onclick=newProjectConfirmSheet;
   }
-  function resetMapConfirmSheet(returnTo=setupSheet){openSheet('Wyczyścić całą mapę?',`<div class="section"><p style="margin-top:0">Wszystkie pola wrócą do stanu początkowego. Tej operacji możesz użyć, gdy chcesz zbudować mapę od nowa bez usuwania osób, pokojów i przedmiotów.</p><p class="danger-text"><strong>Mapa zostanie wyczyszczona.</strong></p></div><div class="grid2"><button class="btn" id="cancelResetMap">Anuluj</button><button class="btn danger" id="confirmResetMap">Wyczyść mapę</button></div>`);$('#cancelResetMap').onclick=returnTo;$('#confirmResetMap').onclick=()=>{change(()=>{state.cells=Array.from({length:state.rows*state.cols},makeCell);state.selected=null;state.clearMode=false;state.mode='build'});closeSheet();toast('Cała mapa została wyczyszczona.')}}
+  function resetMapConfirmSheet(returnTo=setupSheet){openSheet('Wyczyścić całą mapę?',`<div class="section"><p style="margin-top:0">Wszystkie pola wrócą do stanu początkowego. Tej operacji możesz użyć, gdy chcesz zbudować mapę od nowa bez usuwania osób, pokojów i przedmiotów.</p><p class="danger-text"><strong>Mapa zostanie wyczyszczona.</strong></p></div><div class="grid2"><button class="btn" id="cancelResetMap">Anuluj</button><button class="btn danger" id="confirmResetMap">Wyczyść mapę</button></div>`);$('#cancelResetMap').onclick=returnTo;$('#confirmResetMap').onclick=()=>{change(()=>{state.cells=Array.from({length:state.rows*state.cols},makeCell);state.selected=null;state.clearMode=false;state.mode='build'},true,'Wyczyszczono całą mapę');closeSheet();toast('Cała mapa została wyczyszczona.')}}
   function newProjectConfirmSheet(returnTo=setupSheet){openSheet('Nowy pusty projekt?',`<div class="section"><p style="margin-top:0">To usunie także własne osoby, pokoje, przedmioty i opis wskazówek.</p><p class="danger-text"><strong>Cały projekt zostanie zastąpiony.</strong></p></div><div class="grid2"><button class="btn" id="cancelNewProject">Anuluj</button><button class="btn danger" id="confirmNewProject">Utwórz nowy</button></div>`);$('#cancelNewProject').onclick=returnTo;$('#confirmNewProject').onclick=()=>{state=makeState();history=[];future=[];renderAll();saveSoon();closeSheet();toast('Utworzono nowy projekt.')}}
   function resize(nr,nc){const old=state.cells,or=state.rows,oc=state.cols,next=Array.from({length:nr*nc},makeCell);for(let r=0;r<Math.min(or,nr);r++)for(let c=0;c<Math.min(oc,nc);c++)next[r*nc+c]=old[r*oc+c];state.rows=nr;state.cols=nc;state.cells=next;state.selected=null}
   function peopleSheet(){
@@ -691,6 +763,8 @@
   el.boardWrap.addEventListener('touchstart',e=>{if(e.touches.length!==2)return;cancelGesture();const a=e.touches[0],b=e.touches[1];pinch={distance:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),zoom:state.zoom};e.preventDefault()},{passive:false});
   el.boardWrap.addEventListener('touchmove',e=>{if(!pinch||e.touches.length!==2)return;const a=e.touches[0],b=e.touches[1],distance=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);state.zoom=clamp(pinch.zoom*(distance/Math.max(1,pinch.distance)),.65,1.8);e.preventDefault();if(!pinchFrame)pinchFrame=requestAnimationFrame(()=>{pinchFrame=0;fitCellSize();renderBoard()})},{passive:false});
   el.boardWrap.addEventListener('touchend',e=>{if(!pinch||e.touches.length>=2)return;pinch=null;if(pinchFrame){cancelAnimationFrame(pinchFrame);pinchFrame=0}state.zoom=Math.round(state.zoom*100)/100;renderAll();saveSoon()},{passive:false});
+  el.controlsToggle.onclick=()=>{state.controlsCollapsed=!state.controlsCollapsed;renderMode();saveSoon()};
+  el.historyToggle.onclick=()=>{state.historyCollapsed=!state.historyCollapsed;renderMode();saveSoon()};
   el.zoomOut.onclick=()=>setZoom(state.zoom-.15);el.zoomIn.onclick=()=>setZoom(state.zoom+.15);el.zoomFit.onclick=()=>setZoom(1);
   el.buildMode.onclick=()=>{cancelGesture();state.mode='build';renderAll();saveSoon()};el.playMode.onclick=()=>{cancelGesture();state.mode='play';state.clearMode=false;renderAll();saveSoon()};
   el.buildTools.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(!b)return;cancelGesture();state.buildTool=b.dataset.tool;state.clearMode=false;renderAll();saveSoon()});
@@ -700,7 +774,7 @@
   el.activeStrip.addEventListener('click',e=>{const r=e.target.closest('[data-room]'),o=e.target.closest('[data-object]'),p=e.target.closest('[data-person]'),a=e.target.closest('[data-action]');if(r){state.activeRoomId=r.dataset.room;state.clearMode=false;renderStrip();saveSoon()}else if(o){state.activeObjectId=o.dataset.object;state.clearMode=false;renderStrip();saveSoon()}else if(p){const id=p.dataset.person,now=Date.now(),doubleTap=personTap.id===id&&now-personTap.time<430;state.activePersonId=id;if(doubleTap){state.focusPersonId=state.focusPersonId===id?null:id;personTap={id:null,time:0};toast(state.focusPersonId?`Tryb skupienia: ${getPerson(id)?.name||id}.`:'Tryb skupienia wyłączony.')}else{if(state.focusPersonId)state.focusPersonId=id;personTap={id,time:now}}renderAll();saveSoon()}else if(a){if(a.dataset.action==='clear-mode'){state.clearMode=!state.clearMode;renderAll();saveSoon();toast(state.clearMode?'Tryb czyszczenia: dotknij pola.':'Tryb czyszczenia wyłączony.');return}({rooms:roomsSheet,objects:objectsSheet,people:peopleSheet,setup:setupSheet,cell:()=>state.selected==null?toast('Najpierw wybierz pole.'):openCellSheet(state.selected)})[a.dataset.action]?.()}});
   el.menu.onclick=menuSheet;el.closeSheet.onclick=closeSheet;el.backdrop.onclick=closeSheet;
   el.title.addEventListener('input',e=>{state.title=e.target.value;saveSoon()});
-  el.importInput.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);snapshot();state=x;normalize();renderAll();saveSoon();closeSheet();toast('Projekt zaimportowany.')}catch(err){toast('Niepoprawny plik projektu.')}};reader.readAsText(f);e.target.value=''});
+  el.importInput.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);snapshot('Zaimportowano projekt');state=x;normalize();renderAll();saveSoon();closeSheet();toast('Projekt zaimportowany.')}catch(err){toast('Niepoprawny plik projektu.')}};reader.readAsText(f);e.target.value=''});
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
   window.addEventListener('resize',()=>renderAll());
 
