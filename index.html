@@ -59,9 +59,9 @@
     .cell.conflict{box-shadow:inset 0 0 0 5px var(--danger);z-index:5}
     .cell.blocked{background:repeating-linear-gradient(135deg,#172033 0 8px,#26334a 8px 16px);color:#e7ecf7}
     .cell.auto-blocked:not(.blocked){background:#fff1f3}
-    .room-label{position:absolute;z-index:20;display:flex;align-items:flex-end;justify-content:flex-end;padding:3px 7px;border:1px solid rgba(15,23,42,.22);border-radius:10px;background:rgba(255,255,255,.78);box-shadow:0 1px 3px rgba(15,23,42,.10);color:#000;font-size:var(--label-font-size,clamp(8px,calc(var(--cell-size) * .118),11px));line-height:1.08;font-weight:950;text-transform:uppercase;text-align:right;pointer-events:none;overflow:hidden}
-    .room-label.one-line{white-space:nowrap;max-height:1.55em}
-    .room-label.two-lines{white-space:normal;max-height:2.45em}
+    .room-label{position:absolute;z-index:20;display:flex;align-items:center;justify-content:flex-end;padding:3px 7px;border:1px solid rgba(15,23,42,.22);border-radius:10px;background:rgba(255,255,255,.78);box-shadow:0 1px 3px rgba(15,23,42,.10);color:#000;font-size:var(--label-font-size,clamp(6px,calc(var(--cell-size) * .095),16px));line-height:1.08;font-weight:950;text-transform:uppercase;text-align:right;pointer-events:none;overflow:hidden}
+    .room-label.one-line{white-space:nowrap;height:calc(var(--label-font-size) * 1.55 + 6px)}
+    .room-label.two-lines{white-space:normal;height:calc(var(--label-font-size) * 2.45 + 6px)}
     .objects{position:absolute;inset:3px;display:flex;justify-content:center;align-items:center;gap:0;flex-wrap:wrap;line-height:1;z-index:3;filter:drop-shadow(0 2px 2px rgba(255,255,255,.95)) drop-shadow(0 1px 1px rgba(15,23,42,.22));pointer-events:none}
     .object-badge{display:inline-grid;place-items:center;width:48%;height:48%;min-width:0;min-height:0;font-size:calc(var(--cell-size) * .38);line-height:1}
     .objects.count-1 .object-badge{width:100%;height:100%;font-size:calc(var(--cell-size) * .62)}
@@ -143,6 +143,7 @@
     .palette{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.palette button{min-height:54px;border:1px solid var(--line);background:#0e1526;border-radius:12px;font-size:22px}.palette button.active{outline:2px solid var(--accent)}
     .edge-grid{display:grid;grid-template-areas:"x top x2" "left mid right" "x3 bottom x4";grid-template-columns:1fr 1fr 1fr;gap:7px;max-width:230px;margin:auto}.edge-grid button{min-height:48px;border:1px solid var(--line);background:#0e1526;border-radius:11px;font-weight:900}.edge-grid .top{grid-area:top}.edge-grid .left{grid-area:left}.edge-grid .mid{grid-area:mid;background:var(--cell);color:var(--cellText)}.edge-grid .right{grid-area:right}.edge-grid .bottom{grid-area:bottom}
     .quick-actions{display:grid;gap:8px}.quick-action{width:100%;min-height:46px;border:1px solid var(--line);background:#0e1526;border-radius:12px;padding:10px 12px;text-align:left;font-weight:850}.quick-action strong{display:block}.quick-action small{display:block;margin-top:2px;color:var(--muted);font-weight:650;line-height:1.3}.quick-reason{padding:9px 10px;margin-bottom:10px;border-radius:11px;border:1px solid rgba(251,191,36,.42);background:rgba(251,191,36,.08);color:#fde68a;font-size:12px;line-height:1.4}
+    .quick-action.danger{border-color:#713344;background:#3b1d29;color:#ffdbe2}
     .toast{position:fixed;z-index:100;left:12px;right:12px;bottom:calc(92px + var(--safeBottom));padding:11px 13px;border-radius:13px;background:#07101f;border:1px solid #4a5c7e;color:#fff;box-shadow:0 14px 35px rgba(0,0,0,.4);opacity:0;transform:translateY(12px);pointer-events:none;transition:.18s;text-align:center;font-size:13px}.toast.show{opacity:1;transform:none}
     .hint{font-size:12px;color:var(--muted);line-height:1.45}.danger-text{color:#fecdd3}.ok-text{color:#a7f3d0}
     .help-list{padding-left:20px;color:#dbe5f8;font-size:13px;line-height:1.5}.help-list li{margin-bottom:7px}
@@ -256,7 +257,7 @@
     {id:'victim',name:'Ofiara',code:'O',color:'#64748b',victim:true}
   ];
   const makeCell=()=>({roomId:null,blocked:false,objects:[],windows:[],note:'',marks:{},final:null,excluded:false});
-  const makeState=()=>({version:16,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
+  const makeState=()=>({version:17,title:'Moja zagadka',rows:4,cols:4,mode:'build',buildTool:'select',playTool:'candidate',clearMode:false,activeObjectId:'chair',activeRoomId:'room1',activePersonId:'p1',focusPersonId:null,zoom:1,selected:null,objects:clone(DEFAULT_OBJECTS),rooms:clone(DEFAULT_ROOMS),people:clone(DEFAULT_PEOPLE),cells:Array.from({length:16},makeCell),rules:{autoX:true,uniqueRowsCols:true,uniquePeople:true,forbidEquipment:true},display:{excluded:true,objects:true,candidates:true,finals:true},hiddenObjectIds:[],clues:''});
 
   let state=load()||makeState();
   let history=[],future=[],toastTimer=null,saveTimer=null,personTap={id:null,time:0},gesture=null,pinch=null,pinchFrame=0;
@@ -269,7 +270,7 @@
   function load(){try{const raw=localStorage.getItem(STORAGE);return raw?JSON.parse(raw):null}catch(e){return null}}
   function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}},120)}
   function normalize(){
-    const d=makeState();state=Object.assign(d,state||{});state.version=16;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);
+    const d=makeState();state=Object.assign(d,state||{});state.version=17;state.rows=clamp(Number(state.rows)||4,2,16);state.cols=clamp(Number(state.cols)||4,2,16);state.clearMode=!!state.clearMode;state.zoom=clamp(Number(state.zoom)||1,.65,1.8);
     state.objects=Array.isArray(state.objects)?state.objects:d.objects;state.rooms=Array.isArray(state.rooms)?state.rooms:d.rooms;state.rules=Object.assign({},d.rules,state.rules||{});state.display=Object.assign({},d.display,state.display||{});
     const visibleObjectIds=new Set(state.objects.filter(o=>!o.edge).map(o=>o.id));state.hiddenObjectIds=Array.isArray(state.hiddenObjectIds)?[...new Set(state.hiddenObjectIds.filter(id=>visibleObjectIds.has(id)))]:[];
     Object.keys(d.display).forEach(key=>state.display[key]=state.display[key]!==false);
@@ -310,6 +311,20 @@
     while(queue.length){const current=queue.shift(),cell=state.cells[current];if(!cell||cell.blocked||cell.roomId)continue;result.push(current);const p=rc(current);steps.forEach(([dr,dc])=>{const r=p.r+dr,c=p.c+dc;if(r<0||c<0||r>=state.rows||c>=state.cols)return;const n=idx(r,c);if(!seen.has(n)){seen.add(n);queue.push(n)}})}
     result.forEach(i=>state.cells[i].roomId=roomId);return result;
   }
+  function connectedCellZone(start,predicate){
+    if(start<0||start>=state.cells.length||!predicate(state.cells[start],start))return[];
+    const result=[],seen=new Set([start]),queue=[start],steps=[[1,0],[-1,0],[0,1],[0,-1]];
+    while(queue.length){const current=queue.shift();result.push(current);const p=rc(current);steps.forEach(([dr,dc])=>{const r=p.r+dr,c=p.c+dc;if(r<0||c<0||r>=state.rows||c>=state.cols)return;const n=idx(r,c);if(!seen.has(n)&&predicate(state.cells[n],n)){seen.add(n);queue.push(n)}})}
+    return result;
+  }
+  function removeRoomZone(start){
+    const roomId=state.cells[start]?.roomId;if(!roomId)return[];const result=[];
+    state.cells.forEach((cell,i)=>{if(cell.roomId!==roomId)return;result.push(i);cell.roomId=null;cell.objects=[]});
+    return result;
+  }
+  function clearBlockedZone(start){
+    const zone=connectedCellZone(start,cell=>!!cell.blocked);zone.forEach(i=>state.cells[i].blocked=false);return zone;
+  }
   function rc(i){return{r:Math.floor(i/state.cols),c:i%state.cols}}
   function idx(r,c){return r*state.cols+c}
   function edgeNeighbor(i,side){const p=rc(i),map={top:[p.r-1,p.c,'bottom'],right:[p.r,p.c+1,'left'],bottom:[p.r+1,p.c,'top'],left:[p.r,p.c-1,'right']},q=map[side];return q&&q[0]>=0&&q[1]>=0&&q[0]<state.rows&&q[1]<state.cols?{index:idx(q[0],q[1]),opposite:q[2]}:null}
@@ -319,7 +334,7 @@
   function objectIcon(o){if(!o)return'';if(o.id==='table')return'<span class="table-icon" role="img" aria-label="Stół"></span>';return`<span class="emoji-icon">${esc(o.symbol)}</span>`}
   function labelMetrics(name){
     const cellSize=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'))||82;
-    const fontSize=clamp(cellSize*.118,8,11);
+    const fontSize=clamp(cellSize*.095,6,16);
     const canvas=labelMetrics.canvas||(labelMetrics.canvas=document.createElement('canvas'));
     const ctx=canvas.getContext('2d');
     ctx.font=`950 ${fontSize}px -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif`;
@@ -545,6 +560,8 @@
     state.selected=i;renderBoard();const cell=state.cells[i],pos=rc(i),person=getPerson(state.activePersonId),reason=quickReasonForCell(i),actions=[];
     if(state.mode==='build'){
       if(state.buildTool==='room'&&state.activeRoomId){const room=getRoom(state.activeRoomId);actions.push(`<button class="quick-action" id="quickRoomToggle"><strong>🚪 ${cell.roomId===state.activeRoomId?'Usuń wybrany pokój z pola':`Przypisz: ${esc(room?.name||'wybrany pokój')}`}</strong><small>Zmienia tylko przytrzymane pole.</small></button>`);if(!cell.roomId&&!cell.blocked)actions.push(`<button class="quick-action" id="quickFillRoom"><strong>▦ Wypełnij tę białą strefę</strong><small>Wszystkie stykające się białe pola zostaną przypisane do pokoju „${esc(room?.name||'wybranego')}”. Oddzielne białe strefy pozostaną bez zmian.</small></button>`)}
+      if(cell.roomId){const existingRoom=getRoom(cell.roomId),roomFields=state.cells.filter(c=>c.roomId===cell.roomId).length;actions.push(`<button class="quick-action danger" id="quickRemoveRoom"><strong>🗑 Usuń cały pokój: ${esc(existingRoom?.name||'bez nazwy')}</strong><small>Usunie ${roomFields} ${fieldWord(roomFields)} tego pokoju oraz wszystkie przedmioty znajdujące się na tych polach. Pokój pozostanie na liście i będzie można użyć go ponownie.</small></button>`)}
+      if(cell.blocked){const blockedFields=connectedCellZone(i,c=>!!c.blocked).length;actions.push(`<button class="quick-action danger" id="quickRemoveBlocked"><strong>▧ Usuń całą strefę „Niedostępne”</strong><small>Odblokuje ${blockedFields} stykających się bokami ${fieldWord(blockedFields)}. Pokoje i przedmioty pozostaną bez zmian.</small></button>`)}
       if(state.buildTool==='object'&&state.activeObjectId){const obj=getObj(state.activeObjectId);actions.push(`<button class="quick-action" id="quickObject"><strong>${objectIcon(obj)} Przełącz: ${esc(obj?.name||'przedmiot')}</strong><small>Dodaje lub usuwa wybrany przedmiot z pola.</small></button>`)}
       if(state.buildTool==='window')actions.push('<button class="quick-action" id="quickWindow"><strong>🪟 Ustaw okno</strong><small>Wybierz krawędź przytrzymanego pola.</small></button>');
       if(state.buildTool==='block')actions.push(`<button class="quick-action" id="quickBlock"><strong>▧ ${cell.blocked?'Odblokuj':'Zablokuj'} pole</strong></button>`);
@@ -560,6 +577,8 @@
     const done=(message)=>{closeSheet();if(message)toast(message)};
     const roomToggle=$('#quickRoomToggle');if(roomToggle)roomToggle.onclick=()=>{change(()=>cell.roomId=cell.roomId===state.activeRoomId?null:state.activeRoomId);done()};
     const fill=$('#quickFillRoom');if(fill)fill.onclick=()=>{let count=0;change(()=>{count=fillRoomZone(i,state.activeRoomId).length});done(count?`Wypełniono ${count} ${fieldWord(count)} w tej strefie.`:'Ta strefa nie zawiera białych pól.')};
+    const removeRoomBtn=$('#quickRemoveRoom');if(removeRoomBtn)removeRoomBtn.onclick=()=>{const roomName=getRoom(cell.roomId)?.name||'Pokój';let count=0;change(()=>{count=removeRoomZone(i).length});done(`Usunięto „${roomName}” z ${count} ${fieldWord(count)} wraz z przedmiotami.`)};
+    const removeBlockedBtn=$('#quickRemoveBlocked');if(removeBlockedBtn)removeBlockedBtn.onclick=()=>{let count=0;change(()=>{count=clearBlockedZone(i).length});done(`Odblokowano ${count} ${fieldWord(count)} w połączonej strefie.`)};
     const objectBtn=$('#quickObject');if(objectBtn)objectBtn.onclick=()=>{change(()=>{const k=cell.objects.indexOf(state.activeObjectId);if(k>=0)cell.objects.splice(k,1);else cell.objects.push(state.activeObjectId)});done()};
     const windowBtn=$('#quickWindow');if(windowBtn)windowBtn.onclick=()=>openWindowSheet(i);
     const blockBtn=$('#quickBlock');if(blockBtn)blockBtn.onclick=()=>{change(()=>{cell.blocked=!cell.blocked;if(cell.blocked)clearGameMarksAt(i)});done()};
@@ -654,7 +673,7 @@
   }
   function objectForm(id){const o=id?getObj(id):{name:'',symbol:'◆',occupiable:true};openSheet(id?'Edytuj przedmiot':'Nowy przedmiot',`<div class="field"><label>Nazwa</label><input id="objName" value="${esc(o.name)}"></div><div class="field"><label>Emoji lub krótki symbol</label><input id="objSymbol" value="${esc(o.symbol)}" maxlength="4"></div><label class="toggle"><input id="objOcc" type="checkbox" ${o.occupiable?'checked':''}><span>Osoba może zajmować pole z tym przedmiotem</span></label><button class="btn primary full" id="saveObject">Zapisz</button>`);$('#saveObject').onclick=()=>{const name=$('#objName').value.trim(),symbol=$('#objSymbol').value.trim();if(!name||!symbol){toast('Podaj nazwę i symbol.');return}change(()=>{if(id)Object.assign(getObj(id),{name,symbol,occupiable:$('#objOcc').checked});else{const n={id:uid('obj'),name,symbol,occupiable:$('#objOcc').checked,edge:false,builtin:false};state.objects.push(n);state.activeObjectId=n.id}});objectsSheet()}}
   function rulesSheet(){openSheet('Reguły i wskazówki',`<div class="section"><label class="toggle"><input id="autoX" type="checkbox" ${state.rules.autoX?'checked':''}><span>Pokazuj automatyczne X</span></label><label class="toggle"><input id="rowsCols" type="checkbox" ${state.rules.uniqueRowsCols?'checked':''}><span>Każda osoba w innym wierszu i kolumnie</span></label><label class="toggle"><input id="uniquePeople" type="checkbox" ${state.rules.uniquePeople?'checked':''}><span>Każda osoba tylko raz na planszy</span></label><label class="toggle"><input id="equip" type="checkbox" ${state.rules.forbidEquipment?'checked':''}><span>Blokuj stół, TV, roślinę, regał i pudło</span></label></div><div class="field"><label>Opis wskazówek z książki</label><textarea id="clues" placeholder="Przepisz wskazówki…">${esc(state.clues)}</textarea></div><button class="btn primary full" id="saveRules">Zapisz</button>`);$('#saveRules').onclick=()=>{change(()=>{state.rules.autoX=$('#autoX').checked;state.rules.uniqueRowsCols=$('#rowsCols').checked;state.rules.uniquePeople=$('#uniquePeople').checked;state.rules.forbidEquipment=$('#equip').checked;state.clues=$('#clues').value});closeSheet()}}
-  function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Przytrzymaj pole, aby otworzyć szybkie akcje. Przy narzędziu „Pokój” możesz w ten sposób wypełnić całą stykającą się białą strefę wybranym pokojem.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia X, a „Finalnie” ustawia osobę.</li><li>W trybie „Możliwe” lub „Wyklucz” przytrzymaj pole chwilę i przeciągnij palec, aby pomalować kilka pól jednym ruchem.</li><li>Dotknij osobę dwa razy, aby włączyć tryb skupienia. Licznik przy osobie pokazuje liczbę nadal dostępnych zaznaczonych pól.</li><li>Automatyczne X możesz przytrzymać lub podejrzeć, aby zobaczyć jego powód.</li><li>Powiększaj planszę przyciskami −/＋ albo gestem szczypania. „Dopasuj” wraca do widoku całej planszy.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
+  function helpSheet(){openSheet('Jak grać na telefonie',`<ol class="help-list"><li>W <strong>Budowie</strong> ustaw rozmiar z menu, dodaj pokoje, osoby i przedmioty.</li><li>Przytrzymaj pole, aby otworzyć szybkie akcje. Przy narzędziu „Pokój” możesz wypełnić stykającą się białą strefę, usunąć cały pokój wraz z przedmiotami albo odblokować całą połączoną strefę „Niedostępne”.</li><li>W <strong>Grze</strong> „Możliwe” wpisuje kod osoby, „Wyklucz” stawia X, a „Finalnie” ustawia osobę.</li><li>W trybie „Możliwe” lub „Wyklucz” przytrzymaj pole chwilę i przeciągnij palec, aby pomalować kilka pól jednym ruchem.</li><li>Dotknij osobę dwa razy, aby włączyć tryb skupienia. Licznik przy osobie pokazuje liczbę nadal dostępnych zaznaczonych pól.</li><li>Automatyczne X możesz przytrzymać lub podejrzeć, aby zobaczyć jego powód.</li><li>Powiększaj planszę przyciskami −/＋ albo gestem szczypania. „Dopasuj” wraca do widoku całej planszy.</li><li>Ofiarę możesz ustawić ręcznie albo przez menu na ostatnim wolnym przecięciu wiersza i kolumny.</li></ol><p class="hint">Projekt zapisuje się lokalnie. Do kopii zapasowej użyj eksportu JSON.</p>`)}
 
   function placeVictimLast(){
     const victim=state.people.find(p=>p.victim);if(!victim){toast('Brak ofiary.');return}const usedR=new Set(),usedC=new Set();state.cells.forEach((c,i)=>{if(c.final){const p=rc(i);usedR.add(p.r);usedC.add(p.c)}});const freeR=[];for(let r=0;r<state.rows;r++)if(!usedR.has(r))freeR.push(r);const freeC=[];for(let c=0;c<state.cols;c++)if(!usedC.has(c))freeC.push(c);if(freeR.length!==1||freeC.length!==1){toast('Musi pozostać dokładnie jeden wolny wiersz i jedna kolumna.');return}const i=idx(freeR[0],freeC[0]),reason=constraintReason(i,victim.id);if(reason&&state.cells[i].final!==victim.id){toast(reason);return}change(()=>state.cells[i].final=victim.id);closeSheet();toast('Ofiara ustawiona na ostatnim wolnym polu.')
